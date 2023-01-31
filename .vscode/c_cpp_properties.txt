@@ -1,0 +1,85 @@
+//
+// !!! WARNING !!! AUTO-GENERATED FILE!
+// PLEASE DO NOT MODIFY IT AND USE "platformio.ini":
+// https://docs.platformio.org/page/projectconf/section_env_build.html#build-flags
+//
+{
+    "configurations": [
+        {
+            "name": "PlatformIO",
+            "includePath": [
+                "c:/Users/User/Documents/PlatformIO/Projects/JewishClock/HClock/include",
+                "c:/Users/User/Documents/PlatformIO/Projects/JewishClock/HClock/src",
+                "c:/Users/User/Documents/PlatformIO/Projects/JewishClock/HClock/lib/ClockController",
+                "c:/Users/User/Documents/PlatformIO/Projects/JewishClock/HClock/lib/zmanim",
+                "c:/Users/User/Documents/PlatformIO/Projects/JewishClock/HClock/lib/RTCLibWrapper",
+                "c:/Users/User/Documents/PlatformIO/Projects/JewishClock/HClock/lib/DisplayWrapper",
+                "c:/Users/User/Documents/PlatformIO/Projects/JewishClock/HClock/lib/Utils",
+                "c:/Users/User/Documents/PlatformIO/Projects/JewishClock/HClock/.pio/libdeps/master/Noiasca Liquid Crystal",
+                "c:/Users/User/Documents/PlatformIO/Projects/JewishClock/HClock/.pio/libdeps/master/Noiasca Liquid Crystal/utility",
+                "c:/Users/User/Documents/PlatformIO/Projects/JewishClock/HClock/.pio/libdeps/master/avr-debugger/avr8-stub",
+                "c:/Users/User/Documents/PlatformIO/Projects/JewishClock/HClock/.pio/libdeps/master/StateMachine/src",
+                "c:/Users/User/Documents/PlatformIO/Projects/JewishClock/HClock/.pio/libdeps/master/LinkedList",
+                "c:/Users/User/Documents/PlatformIO/Projects/JewishClock/HClock/.pio/libdeps/master/OneButton/src",
+                "c:/Users/User/Documents/PlatformIO/Projects/JewishClock/HClock/.pio/libdeps/master/RTClib/src",
+                "c:/Users/User/Documents/PlatformIO/Projects/JewishClock/HClock/.pio/libdeps/master/Adafruit BusIO",
+                "C:/Users/User/.platformio/packages/framework-arduino-avr/libraries/SPI/src",
+                "C:/Users/User/.platformio/packages/framework-arduino-avr/libraries/Wire/src",
+                "C:/Users/User/.platformio/packages/framework-arduino-avr/cores/arduino",
+                "C:/Users/User/.platformio/packages/framework-arduino-avr/variants/eightanaloginputs",
+                "C:/Users/User/.platformio/packages/framework-arduino-avr/libraries/EEPROM/src",
+                "C:/Users/User/.platformio/packages/framework-arduino-avr/libraries/HID/src",
+                "C:/Users/User/.platformio/packages/framework-arduino-avr/libraries/SoftwareSerial/src",
+                ""
+            ],
+            "browse": {
+                "limitSymbolsToIncludedHeaders": true,
+                "path": [
+                    "c:/Users/User/Documents/PlatformIO/Projects/JewishClock/HClock/include",
+                    "c:/Users/User/Documents/PlatformIO/Projects/JewishClock/HClock/src",
+                    "c:/Users/User/Documents/PlatformIO/Projects/JewishClock/HClock/lib/ClockController",
+                    "c:/Users/User/Documents/PlatformIO/Projects/JewishClock/HClock/lib/zmanim",
+                    "c:/Users/User/Documents/PlatformIO/Projects/JewishClock/HClock/lib/RTCLibWrapper",
+                    "c:/Users/User/Documents/PlatformIO/Projects/JewishClock/HClock/lib/DisplayWrapper",
+                    "c:/Users/User/Documents/PlatformIO/Projects/JewishClock/HClock/lib/Utils",
+                    "c:/Users/User/Documents/PlatformIO/Projects/JewishClock/HClock/.pio/libdeps/master/Noiasca Liquid Crystal",
+                    "c:/Users/User/Documents/PlatformIO/Projects/JewishClock/HClock/.pio/libdeps/master/Noiasca Liquid Crystal/utility",
+                    "c:/Users/User/Documents/PlatformIO/Projects/JewishClock/HClock/.pio/libdeps/master/avr-debugger/avr8-stub",
+                    "c:/Users/User/Documents/PlatformIO/Projects/JewishClock/HClock/.pio/libdeps/master/StateMachine/src",
+                    "c:/Users/User/Documents/PlatformIO/Projects/JewishClock/HClock/.pio/libdeps/master/LinkedList",
+                    "c:/Users/User/Documents/PlatformIO/Projects/JewishClock/HClock/.pio/libdeps/master/OneButton/src",
+                    "c:/Users/User/Documents/PlatformIO/Projects/JewishClock/HClock/.pio/libdeps/master/RTClib/src",
+                    "c:/Users/User/Documents/PlatformIO/Projects/JewishClock/HClock/.pio/libdeps/master/Adafruit BusIO",
+                    "C:/Users/User/.platformio/packages/framework-arduino-avr/libraries/SPI/src",
+                    "C:/Users/User/.platformio/packages/framework-arduino-avr/libraries/Wire/src",
+                    "C:/Users/User/.platformio/packages/framework-arduino-avr/cores/arduino",
+                    "C:/Users/User/.platformio/packages/framework-arduino-avr/variants/eightanaloginputs",
+                    "C:/Users/User/.platformio/packages/framework-arduino-avr/libraries/EEPROM/src",
+                    "C:/Users/User/.platformio/packages/framework-arduino-avr/libraries/HID/src",
+                    "C:/Users/User/.platformio/packages/framework-arduino-avr/libraries/SoftwareSerial/src",
+                    ""
+                ]
+            },
+            "defines": [
+                "PLATFORMIO=60106",
+                "ARDUINO_AVR_NANO",
+                "_WIN32",
+                "DEBUG_CON",
+                "_DEBUG_AVR",
+                "F_CPU=16000000L",
+                "ARDUINO_ARCH_AVR",
+                "ARDUINO=10808",
+                "__AVR_ATmega328P__",
+                ""
+            ],
+            "cStandard": "c11",
+            "cppStandard": "c++11",
+            "compilerPath": "C:/Users/User/.platformio/packages/toolchain-atmelavr/bin/avr-gcc.exe",
+            "compilerArgs": [
+                "-mmcu=atmega328p",
+                ""
+            ]
+        }
+    ],
+    "version": 4
+}
