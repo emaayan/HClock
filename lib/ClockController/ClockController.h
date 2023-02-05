@@ -6,6 +6,8 @@
 #include "DisplayWrapper.h"
 #include "RTCLibWrapper.h"
 
+
+
 #include <hebrewcalendar.h>
 #include <hdateformat.h>
 
@@ -13,14 +15,13 @@ class ClockControler
 {
 
 public:
-    ClockControler(uint8_t address = DEF_ADDRESS, uint8_t lcd_cols = DEF_COLS, uint8_t lcd_rows = DEF_ROWS) //:_disp(address,lcd_cols,lcd_rows)
+    explicit ClockControler(IDisplayWrapper *disp) //:_disp(address,lcd_cols,lcd_rows)
     {
-        _disp = new DisplayWrapper(address, lcd_cols, lcd_rows);
-        // g=GregorianDate(1, 1, 2000);
-        // a=gregDate;
+        _disp = disp;
     }
     void init()
     {
+        _tickStamp = millis();
         _rtc.init();
         _dtv = _rtc.now();
         _displayeddtv = _dtv;
@@ -34,6 +35,7 @@ public:
     {
         displayTime(_dtv);
         displayHebDate(_displayeddtv);
+        displayConfigMode(RTCLibWrapper::NONE);
         //   debug("InitStates");
     }
 
@@ -43,128 +45,143 @@ public:
     }
     void changeMode(RTCLibWrapper::DatePart mode)
     {
-        _dp = mode;
-        displayConfigMode();
+        displayConfigMode(mode);
     }
+
     RTCLibWrapper::DatePart getMode()
     {
         return _dp;
     }
+
     void increment()
     {
-        _dtv = _rtc.increment(_dp, _dtv);
-        _rtc.changeTime(_dtv);
-        
-        refresh();
+        RTCLibWrapper::DateTimeValue dtv = _rtc.increment(_dp, _dtv);
+        _rtc.changeTime(dtv);
     }
+
     void decrement()
     {
-        _dtv = _rtc.decrement(_dp, _dtv);
-        _rtc.changeTime(_dtv);
+        RTCLibWrapper::DateTimeValue dtv = _rtc.decrement(_dp, _dtv);
+        _rtc.changeTime(dtv);
+    }
 
-        refresh();
-    }
-    void refresh(){
-        
-        displayTime(_dtv);
-   //     displayConfigMode();
-        displayHebDate(_dtv);
-    }
-    void display(const char *buffer, uint8_t col = 0, uint8_t row = 0, bool rtl = false)
+    void onTick()
     {
-        _disp->display(buffer, col, row, rtl);
+        unsigned long tick = millis();
+        unsigned long resolution = 200;
+        unsigned long delta = tick - _tickStamp;
+        //  debug("Tick %d %d ",tick,delta);
+        if (delta > resolution)
+        {
+            onTickChanged(delta);
+            _tickStamp = tick;
+        }
     }
-
-    void onReadTime()
+    void onTickChanged(unsigned long tickDelta)
     {
-
-         RTCLibWrapper::DateTimeValue dtv =_rtc.now();
-     //   if (abs(_rtc.differenceInSeconds(dtv, _dtv)) >= 1)
+        RTCLibWrapper::DateTimeValue dtv = _rtc.now();
+        if (abs(_rtc.differenceInSeconds(dtv, _dtv)) >= 1)
         {
             displayTime(dtv);
         }
-
-        if (abs(_rtc.differenceInSeconds(_displayeddtv, _dtv)) >= 63)
+        if (abs(_rtc.differenceInSeconds(_displayeddtv, _dtv)) >= 60)
         {
-            displayHebDate(_displayeddtv);
+            displayHebDate(_dtv);
         }
     }
-    void displayConfigMode(){
-        const char c[2]={getConfigMode(),'\0'};
-        _disp->display(c,19,0,false);
-    }
-    RTCLibWrapper::DateTimeValue displayTime(RTCLibWrapper::DateTimeValue dtv)
+
+    void displayConfigMode(RTCLibWrapper::DatePart dp)
     {
-        
-        char fmt[] = "DD/MM/YYYY hh:mm";
+        char confMode = getConfigMode(dp);
+        const char c[2] = {confMode, '\0'};
+        _disp->display(c, 19, 0, false);
+        _dp = dp;
+    }
+
+    void displayTime(RTCLibWrapper::DateTimeValue dtv)
+    {
+        char fmt[] = "DD/MM/YYYY hh:mm:ss";
         char *time = _rtc.toString(dtv, fmt);
-        //   debug(time);        
         _disp->println(0, false, "%-19s", time);
-        displayConfigMode();
         _dtv = dtv;
-        return dtv;
     }
-    void displayHebDate(RTCLibWrapper::DateTimeValue dtv)
+
+    void displayHebrewDayMonth(const hdate hebrewDate)
     {
-
-        const float timezone = 2.0; //-4.0;
-        const long int offset = (long int)3600 * timezone;
-
-        tm ltm = _rtc.convertToStdTime(dtv);
-        hdate hebrewDate = convertDate(ltm);
-
-        hebrewDate.EY = 1; // if it's in israel TODO: cofigure per location
-        hebrewDate.offset = offset;
-
         const char *day_name = numtowday(hebrewDate, 1);
 
-        char day[3 * 2] = "";
-        numtohchar(day, sizeof(day), hebrewDate.day);
-        const char *month = numtohmonth(hebrewDate.month, hebrewDate.leap);
+        char dayInMonth[3 * 2] = "";
+        numtohchar(dayInMonth, sizeof(dayInMonth), hebrewDate.day);
+        const char *monthName = numtohmonth(hebrewDate.month, hebrewDate.leap);
 
-        yomtov isNewMonth = getroshchodesh(hebrewDate);
-        //   //  debug("is new month %d ",isNewMonth);
-        char isNewMonthName[(3 * 2) + 1] = "";
+        const yomtov isNewMonth = getroshchodesh(hebrewDate);
+        char isNewMonthIndicator[9 + 1] = "";
+        const long sz_month=sizeof(isNewMonthIndicator);
         if (isNewMonth != CHOL)
         {
-            const char *buf = PSTR("ר\"ח"); // yomtovformat(isNewMonth);
-            debug("Is new MOnth %s", buf);
-            strncpy_P(isNewMonthName, buf, sizeof(isNewMonthName));
-            _disp->println(1, true, "%s, %s %s, %s  ", day_name, day, month, isNewMonthName);
+            const char *buf = PSTR(", ר\"ח"); // yomtovformat(isNewMonth);
+            strncpy_P(isNewMonthIndicator, buf, sz_month);
         }
         else
         {
-            _disp->println(1, true, "%s, %s %-14s", day_name, day, month);
+            strncpy(isNewMonthIndicator, "", sz_month);
         }
+        
+        _disp->println(1, true, "%s, %s %s %s", day_name, dayInMonth, monthName, isNewMonthIndicator);
+    }
 
-        yomtov yom_tov = getyomtov(hebrewDate);
-        // yom_tov=CHOL_HAMOED_SUKKOS_DAY1;
-        debug("yom_tov %d ", yom_tov);
+    void displayFestival(const hdate hebrewDate)
+    {
+        const yomtov yom_tov = getyomtov(hebrewDate);
+        // yom_tov=CHOL_HAMOED_SUKKOS_DAY3;
 
-        size_t yom_tov_name_size = 30;
+        const size_t yom_tov_name_size = 39;
         char yom_tov_name[yom_tov_name_size] = "";
 
         if (yom_tov != CHOL)
         {
             const char *buf = yomtovformat(yom_tov);
             strncpy_P(yom_tov_name, buf, yom_tov_name_size);
-            debug("yom tov %s", buf);
         }
-        _disp->println(2, true, "%-24s", yom_tov_name);
 
-        int omer_count = getomer(hebrewDate);
-        char omer_day[5 + 1] = "";
+        _disp->println(2, true, "%s", yom_tov_name);
+    }
+
+    void displayOmer(const hdate hebrewDate)
+    {
+
         char omer_count_name[(9 * 2) + 1] = "";
+        const long omer_count_size = sizeof(omer_count_name);
+
+        const int omer_count = getomer(hebrewDate);
         if (omer_count)
         {
+            char omer_day[5 + 1] = "";
             numtohchar(omer_day, sizeof(omer_day), omer_count);
-            snprintf(omer_count_name, sizeof(omer_count_name), "%s בעומר", omer_day);
+            snprintf(omer_count_name, omer_count_size, "%s בעומר", omer_day);
         }
 
-        _disp->println(3, true, "%-20s", omer_count_name);
+        _disp->println(3, true, "%s", omer_count_name);
+    }
+
+    void displayHebDate(RTCLibWrapper::DateTimeValue dtv)
+    {
+
+        const float timezone = 2.0; //-4.0;
+        const long int offset = (long int)3600 * timezone;
+
+        const tm ltm = _rtc.convertToStdTime(dtv);
+        hdate hebrewDate = convertDate(ltm);
+
+        hebrewDate.EY = 1; // if it's in israel TODO: cofigure per location
+        hebrewDate.offset = offset;
+        displayHebrewDayMonth(hebrewDate);
+        displayFestival(hebrewDate);
+        displayOmer(hebrewDate);
 
         _displayeddtv = dtv;
     }
+
     const char *yomtovformat(yomtov current)
     {
         switch (current)
@@ -254,13 +271,13 @@ public:
         case SHUSHAN_PURIM:
             return PSTR("שושן פורים");
         case SHIVA_ASAR_BTAAMUZ:
-            return PSTR("שבעה עשר בתמוז");
+            return PSTR("צום שבעה עשר בתמוז");
         case TISHA_BAV:
-            return PSTR("ט׳ באב");
+            return PSTR("צום תשעה באב");
         case TZOM_GEDALIA:
             return PSTR("צום גדליה");
         case ASARAH_BTEVES:
-            return PSTR("עשרה בטבת");
+            return PSTR("צום עשרה בטבת");
         case TAANIS_ESTER:
             return PSTR("תענית אסתר");
         case EREV_PESACH:
@@ -291,9 +308,9 @@ public:
         return "\0";
     }
 
-    char getConfigMode()
+    char getConfigMode(RTCLibWrapper::DatePart dp)
     {
-        switch (_dp)
+        switch (dp)
         {
         case RTCLibWrapper::NONE:
             return ' ';
@@ -327,6 +344,7 @@ private:
     RTCLibWrapper _rtc;
     RTCLibWrapper::DatePart _dp = RTCLibWrapper::NONE;
     IDisplayWrapper *_disp;
+    unsigned long _tickStamp = 0;
 };
 
 #endif

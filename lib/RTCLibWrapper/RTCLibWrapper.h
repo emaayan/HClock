@@ -70,7 +70,7 @@ public:
     {
         DateTime leftdt = fromDateTimeValue(leftdtv);
         DateTime rightdt = fromDateTimeValue(rightdtv);
-        TimeSpan ts=leftdt-rightdt;
+        TimeSpan ts = leftdt - rightdt;
         return ts.totalseconds();
     }
     DateTimeValue increment(DatePart dp, DateTimeValue dtv)
@@ -93,21 +93,31 @@ public:
         }
         case DAY:
         {
-            int day = dtv.day == numDayInMonth(dtv.year, dtv.month) ? 1 : dtv.day + 1;
-            DateTime dateTime(dtv.year, dtv.month, day, dtv.hour, dtv.minute, dtv.second);
-            return toDateTimeValue(dateTime);
+
+            DateTime dt = fromDateTimeValue(dtv);
+            dt = dt + TimeSpan(1, 0, 0, 0);
+            return toDateTimeValue(dt);
+            // int day = dtv.day == numDayInMonth(dtv.year, dtv.month) ? 1 : dtv.day + 1;
+            // DateTime dateTime(dtv.year, dtv.month, day, dtv.hour, dtv.minute, dtv.second);
+            // return toDateTimeValue(dateTime);
         }
         case HOUR:
         {
-            int hour = dtv.hour == 23 ? 0 : dtv.hour + 1;
-            DateTime dateTime(dtv.year, dtv.month, dtv.day, hour, dtv.minute, dtv.second);
-            return toDateTimeValue(dateTime);
+            DateTime dt = fromDateTimeValue(dtv);
+            dt = dt + TimeSpan(0, 1, 0, 0);
+            return toDateTimeValue(dt);
+            // int hour = dtv.hour == 23 ? 0 : dtv.hour + 1;
+            // DateTime dateTime(dtv.year, dtv.month, dtv.day, hour, dtv.minute, dtv.second);
+            // return toDateTimeValue(dateTime);
         }
         case MINUTE:
         {
-            int minute = dtv.minute == 59 ? 0 : dtv.minute + 1;
-            DateTime dateTime(dtv.year, dtv.month, dtv.day, dtv.hour, minute, dtv.second);
-            return toDateTimeValue(dateTime);
+            DateTime dt = fromDateTimeValue(dtv);
+            dt = dt + TimeSpan(0, 0, 1, 0);
+            return toDateTimeValue(dt);
+            // int minute = dtv.minute == 59 ? 0 : dtv.minute + 1;
+            // DateTime dateTime(dtv.year, dtv.month, dtv.day, dtv.hour, minute, dtv.second);
+            // return toDateTimeValue(dateTime);
         }
         case SECOND:
         {
@@ -141,21 +151,28 @@ public:
         }
         case DAY:
         {
-            int day = dtv.day == 1 ? numDayInMonth(dtv.year, dtv.month) : dtv.day - 1;
-            DateTime dateTime(dtv.year, dtv.month, day, dtv.hour, dtv.minute, dtv.second);
-            return toDateTimeValue(dateTime);
+            DateTime dt = fromDateTimeValue(dtv);
+            dt = dt - TimeSpan(1, 0, 0, 0);
+            return toDateTimeValue(dt);
+            // int day = dtv.day == 1 ? numDayInMonth(dtv.year, dtv.month) : dtv.day - 1;
+            // DateTime dateTime(dtv.year, dtv.month, day, dtv.hour, dtv.minute, dtv.second);
+            // return toDateTimeValue(dateTime);
         }
         case HOUR:
         {
-            int hour = dtv.hour == 0 ? 23 : dtv.hour - 1;
-            DateTime dateTime(dtv.year, dtv.month, dtv.day, hour, dtv.minute, dtv.second);
-            return toDateTimeValue(dateTime);
+            DateTime dt = fromDateTimeValue(dtv);
+            dt = dt - TimeSpan(0, 1, 0, 0);
+            // int hour = dtv.hour == 0 ? 23 : dtv.hour - 1;
+            // DateTime dateTime(dtv.year, dtv.month, dtv.day, hour, dtv.minute, dtv.second);
+            // return toDateTimeValue(dateTime);
         }
         case MINUTE:
         {
-            int minute = dtv.minute == 0 ? 59 : dtv.minute - 1;
-            DateTime dateTime(dtv.year, dtv.month, dtv.day, dtv.hour, minute, dtv.second);
-            return toDateTimeValue(dateTime);
+            DateTime dt = fromDateTimeValue(dtv);
+            dt = dt - TimeSpan(0, 0, 1, 0);
+            // int minute = dtv.minute == 0 ? 59 : dtv.minute - 1;
+            // DateTime dateTime(dtv.year, dtv.month, dtv.day, dtv.hour, minute, dtv.second);
+            // return toDateTimeValue(dateTime);
         }
         case SECOND:
         {
@@ -243,7 +260,7 @@ private:
     int dayofweek(int d, int m, int y)
     {
         y += 2000;
-        static int t[] = {0, 3, 2, 5, 0, 3, 5, 1, 4, 6, 2, 4};
+        const static int t[] = {0, 3, 2, 5, 0, 3, 5, 1, 4, 6, 2, 4};
         y -= m < 3;
         return (y + y / 4 - y / 100 + y / 400 + t[m - 1] + d) % 7;
     }

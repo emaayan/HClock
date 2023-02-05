@@ -1,3 +1,4 @@
+
 #include <Arduino.h>
 #include <OneButton.h>
 
@@ -14,15 +15,15 @@
 // https://www.sciencedirect.com/science/article/pii/0898122177900931
 
 // https://github.com/yparitcher/libzmanim
-// #define DEBUG_CON
+// #define DEBUG_CON 
 
 #include "Utils.h"
 
 #ifdef DEBUG_AVR
 #include <avr8-stub.h>
 #endif
-
-ClockControler clockControler;
+IDisplayWrapper * _disp=new DisplayWrapper();
+ClockControler clockControler(_disp);
 
 /* #region  Machine */
 StateMachine machine;
@@ -48,7 +49,7 @@ void setupMachine()
                            idleState);
 
   readTimeState = machine.addState([]()
-                                   { clockControler.onReadTime(); });
+                                   { clockControler.onTick(); });
 
   idleState->addTransition([]()
                            { return true; },
@@ -146,7 +147,10 @@ void setupButtons()
   set_state_button.attachClick(onSwitchConfigMode);
 
   increase_button.attachClick(onIncrement);
+  increase_button.attachDuringLongPress(onIncrement);
   decrease_button.attachClick(onDecrement);
+  decrease_button.attachDuringLongPress(onDecrement);
+  
 }
 
 void onTickButtons()
@@ -183,8 +187,6 @@ int i = 0;
 void loop()
 {
  // delay(1000);
-   char cc[2]="";   
-   sprintf(cc,"%s hello",cc);
-   debug("%s ",cc);
+   
   onTick();
 }

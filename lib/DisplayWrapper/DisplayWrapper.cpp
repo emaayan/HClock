@@ -9,7 +9,7 @@ DisplayWrapper::DisplayWrapper(uint8_t address, uint8_t lcd_cols, uint8_t lcd_ro
 
 void DisplayWrapper::init()
 {
-    _lcd.begin();
+    _lcd.init();    
     _lcd.clear();
 }
 
@@ -19,35 +19,21 @@ void DisplayWrapper::lightUp()
 }
 
 void DisplayWrapper::println(uint8_t row, bool rtl, const char *fmt, ...)
-{
-    size_t size = (rtl ? _cols * 2 : _cols) + 1;
-    char buffer[size];
+{    
+    const size_t size =(rtl ? _cols * 2 : _cols) + 1;    
+    char buffer[size]="";
+     if (rtl){//must be done cause don't know how to pad spaces
+        char blank[_cols]="";
+        memset(blank,' ',sizeof(blank)-1);
+        display(blank, 0, row, rtl);
+    }
+    
     va_list argptr;
-    va_start(argptr, fmt);
-    vsnprintf(buffer, sizeof(buffer), fmt, argptr);
-    va_end(argptr);
-    char buf[size];
+    va_start(argptr, fmt);    
+    
+    vsnprintf(buffer, sizeof(buffer), fmt, argptr);    
+    va_end(argptr);      
 
-    // if (rtl)
-    // {
-    //     char fmtbuf[7] = "%-30s";        
-    //     snprintf(buf, sizeof(buf), fmtbuf, buffer);
-    //     display(buf, 0, row, rtl);
-    // }
-    
-    // else
-    // {
-    //     char fmtbuf[7] = "%-25s";        
-    //     snprintf(buf, sizeof(buf), fmtbuf, buffer);
-    //     display(buf, 0, row, rtl);
-    // }
-    
-    //  snprintf(fmtbuf,sizeof(fmtbuf), "%%%ds", -1*(int)_cols);
-    
-    // debug("Format buffer %s", fmtbuf);
-    // debug("buf %s", buf);
-
-    // debug("Buffer %s", buffer);
 
     display(buffer, 0, row, rtl);
 }
@@ -64,7 +50,8 @@ void DisplayWrapper::display(const char *buffer, uint8_t col, uint8_t row, bool 
         _lcd.leftToRight();
         _lcd.setCursor(col, row);
     }
-    _lcd.print(buffer);
+    _lcd.print(buffer);    
+    
 }
 void DisplayWrapper::clear()
 {

@@ -84,9 +84,9 @@ void loop()
   const char * day_name= numtowday(hebrewDate,1);
   disp.display(day_name,0,1,true);
 
-  char today[17] = {"\0"};
-  hdate_short_format(today, sizeof(today), hebrewDate);
-  disp.display(today, 6, 1, true);
+  //char today[17] = {"\0"};
+  //hdate_short_format(today, sizeof(today), hebrewDate);
+  //disp.display(today, 6, 1, true);
 
   
   yomtov yom_tov = getyomtov(hebrewDate);
