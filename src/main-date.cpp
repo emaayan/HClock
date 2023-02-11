@@ -14,7 +14,7 @@
 #include <avr8-stub.h>
 #include <app_api.h>
 #endif
-#include <Utils.h>
+#include <DebugUtils.h>
 DisplayWrapper disp = DisplayWrapper(DEF_ADDRESS, DEF_COLS, DEF_ROWS);
 RTCLibWrapper rtc;
 void setup()

@@ -1,5 +1,5 @@
-#include "DisplayWrapper.h"
-#include <Utils.h>
+#include <DisplayWrapper.h>
+#include <DebugUtils.h>
 
 DisplayWrapper::DisplayWrapper(uint8_t address, uint8_t lcd_cols, uint8_t lcd_rows) : _lcd(address, lcd_cols, lcd_rows, convert_SPLC780D1_015A)
 {
@@ -24,7 +24,7 @@ void DisplayWrapper::println(uint8_t row, bool rtl, const char *fmt, ...)
     char buffer[size]="";
      if (rtl){//must be done cause don't know how to pad spaces
         char blank[_cols]="";
-        memset(blank,' ',sizeof(blank)-1);
+        memset(blank,' ',sizeof(blank));
         display(blank, 0, row, rtl);
     }
     

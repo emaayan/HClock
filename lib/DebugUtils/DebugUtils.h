@@ -1,9 +1,9 @@
-#ifndef Utils_h
+#ifndef DebugUtils_h
 
-#define Utils_h
+#define DebugUtils_h
 
 #include <stdio.h>
-#include <Arduino.h>
+
 
 void debug(const char *fmt, ...);
 

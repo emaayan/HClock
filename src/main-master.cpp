@@ -1,80 +1,30 @@
 
 #include <Arduino.h>
 #include <OneButton.h>
-
-#include <StateMachine.h>
-#include <LinkedList.h>
-#include "ClockController.h"
-
-// #define DEBUG_AVR
-
-// https://playground.arduino.cc/Code/Time/
-// https://kosherjava.com/zmanim-project/downloads/
-
-// http://harel.org.il/zvi/calendar/gauss/gauss.pdf
-// https://www.sciencedirect.com/science/article/pii/0898122177900931
-
-// https://github.com/yparitcher/libzmanim
-// #define DEBUG_CON 
-
-#include "Utils.h"
-
+#include <IRTCLibWrapper.h>
+#include <RTCLibWrapper.h>
+#include <DisplayWrapper.h>
+#include <ClockController.h>
+#include <DebugUtils.h>
 #ifdef DEBUG_AVR
 #include <avr8-stub.h>
 #endif
+
 IDisplayWrapper * _disp=new DisplayWrapper();
-ClockControler clockControler(_disp);
+IRTCLibWrapper * _rtc=new RTCLibWrapper();
+ClockControler clockControler(_disp,_rtc);
 
-/* #region  Machine */
-StateMachine machine;
-
-State *initState;
-State *idleState;
-State *readTimeState;
-
-State *yearChange;
-State *monthChange;
-State *dayChange;
 
 void setupMachine()
-{
-  initState = machine.addState([]()
-                               { clockControler.onInit(); });
-
-  idleState = machine.addState([]()
-                               { clockControler.onIdle(); });
-
-  initState->addTransition([]()
-                           { return true; },
-                           idleState);
-
-  readTimeState = machine.addState([]()
-                                   { clockControler.onTick(); });
-
-  idleState->addTransition([]()
-                           { return true; },
-                           readTimeState);
-
-  readTimeState->addTransition([]()
-                               { return true; },
-                               idleState);
-
-  yearChange = machine.addState([]() {
-
-  });
-
-  monthChange = machine.addState([]() {});
-
-  dayChange = machine.addState([]() {});
-  ///  machine.transitionTo()
-  //  yearChange->addTransition()
+{    
 }
 
 void onTickMachine()
 {
-  machine.run();
+  clockControler.onTick();
+
 }
-/* #endregion */
+
 
 /* #region  Buttons */
 const int RED_BUTTUN = 2;
@@ -143,7 +93,7 @@ void onDecrement()
 }
 void setupButtons()
 {
-  set_state_button.attachLongPressStop(onInitConfigEnter);
+  set_state_button.attachLongPressStart(onInitConfigEnter);
   set_state_button.attachClick(onSwitchConfigMode);
 
   increase_button.attachClick(onIncrement);
@@ -173,7 +123,14 @@ void setup()
 
   Wire.begin();
 
-  clockControler.init();
+  ClockSettings settings;
+  
+  settings.timezone=2.0;
+  settings.isIsrael=1;
+  settings.latitude=40.66896;
+  settings.longitude=-73.94284;
+  settings.elevation=34;
+  clockControler.init(settings);
   setupMachine();
   setupButtons();  
 }

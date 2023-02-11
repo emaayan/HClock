@@ -4,24 +4,19 @@
 #include <avr8-stub.h>
 #include <app_api.h>
 #endif
+
 void debug(const char *fmt, ...)
 {
-#ifdef DEBUG_AVR
-  char buffer[256] = "";
+  char buffer[20] = "";
   va_list argptr;
   va_start(argptr, fmt);
   vsnprintf(buffer, sizeof(buffer), fmt, argptr);
   va_end(argptr);
 
+#ifdef DEBUG_AVR
   debug_message(buffer);
 #endif
 #ifdef DEBUG_CON
-  char buffer[60] = "";
-  va_list argptr;
-  va_start(argptr, fmt);
-  vsnprintf(buffer, sizeof(buffer), fmt, argptr);
-  va_end(argptr);
-
   Serial.println(buffer);
 #endif
 }

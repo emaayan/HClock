@@ -1,7 +1,7 @@
 #ifndef DisplayWrapper_h
 #define DisplayWrapper_h
 
-#include "IDisplayWrapper.h"
+#include <IDisplayWrapper.h>
 #include <Wire.h>
 #include <NoiascaHW/lcd_PCF8574.h> // I2C
 
