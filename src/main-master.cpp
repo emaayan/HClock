@@ -6,34 +6,62 @@
 #include <DisplayWrapper.h>
 #include <ClockController.h>
 #include <DebugUtils.h>
+#include <EEPROM.h>
+
 #ifdef DEBUG_AVR
 #include <avr8-stub.h>
 #endif
 
-IDisplayWrapper * _disp=new DisplayWrapper();
-IRTCLibWrapper * _rtc=new RTCLibWrapper();
-ClockControler clockControler(_disp,_rtc);
+IDisplayWrapper *_disp = new DisplayWrapper();
+IRTCLibWrapper *_rtc = new RTCLibWrapper();
+ClockControler clockControler(_disp, _rtc);
 
-
-void setupMachine()
-{    
+const int UNREADVALUE = 255;
+uint8_t readSetting(int addr)
+{
+  return EEPROM.read(addr);
 }
 
-void onTickMachine()
+void writeSetting(int addr, uint8_t value)
 {
-  clockControler.onTick();
+  if (value < UNREADVALUE)
+  {
+    EEPROM.write(addr, value);
+  }
+}
 
+
+uint8_t initSetting(int addr, int def)
+{
+  uint8_t setting = readSetting(addr);
+  if (setting == UNREADVALUE)
+  {
+    setting = def;    
+    writeSetting(addr,setting);    
+  }
+  return setting;
 }
 
 
 /* #region  Buttons */
-const int RED_BUTTUN = 2;
-const int GREEN_BUTTUN = 4;
-const int BLUE_BUTTUN = 8;
+#ifndef RED_BUTTON
+#define RED_BUTTON 4
+#endif
+#ifndef GREEN_BUTTON
+#define GREEN_BUTTON 7
+#endif
 
-OneButton set_state_button(RED_BUTTUN, false);
-OneButton increase_button(GREEN_BUTTUN, false);
-OneButton decrease_button(BLUE_BUTTUN, false);
+#ifndef BLUE_BUTTON
+#define BLUE_BUTTON 8
+#endif
+
+#ifndef PULL_UP
+#define PULL_UP false
+#endif
+
+OneButton set_state_button(RED_BUTTON, PULL_UP);
+OneButton increase_button(GREEN_BUTTON, PULL_UP);
+OneButton decrease_button(BLUE_BUTTON, PULL_UP);
 
 void onExitConfigEnter()
 {
@@ -78,19 +106,85 @@ void onSwitchConfigMode()
     dp = RTCLibWrapper::NONE;
     break;
   default:
-
     break;
   }
   clockControler.changeMode(dp);
 }
+
+#ifndef BRIGHTNESS_PIN
+  #define BRIGHTNESS_PIN 6
+#endif
+
+uint8_t brightness;
+const uint8_t brightAdjResolution = 10;
+const int BRIGHT_ADDR = 0;
+
+void sendBrightness(uint8_t brightness){
+  analogWrite(BRIGHTNESS_PIN, brightness);   
+}
+
+void initBrightness()
+{
+  pinMode(BRIGHTNESS_PIN, OUTPUT);
+  brightness = initSetting(BRIGHT_ADDR, 100);  
+  sendBrightness(brightness);   
+}
+
+/*
+  *true increase, false decrease, every change write to EEPROM
+*/
+uint8_t setBrightness(bool dir)
+{
+  int8_t i = dir ? -1 : 1;//this is because PNP transistor
+  int8_t setting = i * brightAdjResolution;
+  uint8_t curSetting=brightness;
+  uint8_t settingToBe=curSetting + setting;
+  if (settingToBe > 0 && settingToBe < 255)
+  {
+    brightness = settingToBe;
+    writeSetting(BRIGHT_ADDR, brightness);    
+    sendBrightness(brightness);   
+  }
+  return brightness;
+}
+
+void incBrightness()
+{  
+  setBrightness(true);  
+}
+
+void decBrightness()
+{
+  setBrightness(false);
+}
+
 void onIncrement()
 {
-  clockControler.increment();
+  RTCLibWrapper::DatePart dp = clockControler.getMode();
+  if (dp != RTCLibWrapper::NONE)
+  {
+    clockControler.increment();
+  }
+  else
+  {    
+    incBrightness();
+  }
+ 
 }
+
 void onDecrement()
 {
-  clockControler.decrement();
+  RTCLibWrapper::DatePart dp = clockControler.getMode();
+  if (dp != RTCLibWrapper::NONE)
+  {
+    clockControler.decrement();
+  }
+  else
+  {
+    decBrightness();    
+  }
 }
+
 void setupButtons()
 {
   set_state_button.attachLongPressStart(onInitConfigEnter);
@@ -100,7 +194,6 @@ void setupButtons()
   increase_button.attachDuringLongPress(onIncrement);
   decrease_button.attachClick(onDecrement);
   decrease_button.attachDuringLongPress(onDecrement);
-  
 }
 
 void onTickButtons()
@@ -116,7 +209,6 @@ void setup()
 #ifdef DEBUG_AVR
   debug_init();
 #endif
-
 #ifdef DEBUG_CON
   Serial.begin(115200);
 #endif
@@ -124,26 +216,27 @@ void setup()
   Wire.begin();
 
   ClockSettings settings;
-  
-  settings.timezone=2.0;
-  settings.isIsrael=1;
-  settings.latitude=40.66896;
-  settings.longitude=-73.94284;
-  settings.elevation=34;
+
+  settings.timezone = 2.0;
+  settings.isIsrael = 1;
+  settings.latitude = 40.66896;
+  settings.longitude = -73.94284;
+  settings.elevation = 34;
   clockControler.init(settings);
-  setupMachine();
-  setupButtons();  
+  initBrightness();
+  setupButtons();
 }
 
 void onTick()
 {
   onTickButtons();
-  onTickMachine();
+  
+  clockControler.onTick();
 }
-int i = 0;
+
 void loop()
 {
- // delay(1000);
-   
+  // delay(1000);
+  
   onTick();
 }

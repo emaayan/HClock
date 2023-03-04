@@ -221,7 +221,7 @@ RTCLibWrapper::DateTimeValue RTCLibWrapper::decrement(RTCLibWrapper::DatePart dp
         dt = dt - TimeSpan(0, 1, 0, 0);
         // int hour = dtv.hour == 0 ? 23 : dtv.hour - 1;
         // DateTime dateTime(dtv.year, dtv.month, dtv.day, hour, dtv.minute, dtv.second);
-        // return toDateTimeValue(dateTime);
+        return toDateTimeValue(dt);
     }
     case RTCLibWrapper::MINUTE:
     {
@@ -229,7 +229,7 @@ RTCLibWrapper::DateTimeValue RTCLibWrapper::decrement(RTCLibWrapper::DatePart dp
         dt = dt - TimeSpan(0, 0, 1, 0);
         // int minute = dtv.minute == 0 ? 59 : dtv.minute - 1;
         // DateTime dateTime(dtv.year, dtv.month, dtv.day, dtv.hour, minute, dtv.second);
-        // return toDateTimeValue(dateTime);
+        return toDateTimeValue(dt);
     }
     case RTCLibWrapper::SECOND:
     {

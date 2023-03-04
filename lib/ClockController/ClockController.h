@@ -5,12 +5,11 @@
 #include <IDisplayWrapper.h>
 #include <IRTCLibWrapper.h>
 
-
 extern "C"
 {
 #include <hebrewcalendar.h>
 #include <hdateformat.h>
-#include <zmanim.h>
+//#include <zmanim.h>
 }
 struct ClockSettings
 {
@@ -24,11 +23,10 @@ class ClockControler
 {
 
 public:
-    explicit ClockControler(IDisplayWrapper *disp,IRTCLibWrapper * rtc)
+    explicit ClockControler(IDisplayWrapper *disp, IRTCLibWrapper *rtc)
     {
         _disp = disp;
-        _rtc=rtc;
-        
+        _rtc = rtc;
     }
     void init(const ClockSettings &settings)
     {
@@ -46,7 +44,6 @@ public:
         displayHebDate(_displayeddtv);
         displayConfigMode(RTCLibWrapper::NONE);
     }
-   
 
     void changeMode(RTCLibWrapper::DatePart mode)
     {
@@ -137,8 +134,8 @@ public:
 
     void displayFestival(const hdate &hebrewDate)
     {
-        const yomtov yom_tov = getyomtov(hebrewDate);    
-        const char * yom_tov_name =yomtovformat(yom_tov);        
+        const yomtov yom_tov = getyomtov(hebrewDate);
+        const char *yom_tov_name = yomtovformat(yom_tov);
         _disp->println(2, true, "%s", yom_tov_name);
     }
 
@@ -166,7 +163,25 @@ public:
             snprintf(omer_count_name, omer_count_size, "%s בעומר", omer_day);
         }
 
- 
+        // if (iscandlelighting(hebrewDate) == 1)
+        //     {
+        //         location here={0,0,0};
+        //        hdate hd= getcandlelighting(hebrewDate, here);
+        //         char  * c=formattime(hd);
+        //         _disp->println(3, true, "%s", c);
+        //      //   printf("%-20.20s%s\n", "candle lighting: ", formattime(hd));
+        //     }
+        // printf("%-20.20s%s\n", "sunset: ", formattime(getsunset(hebrewDate, here)));
+        //     if (iscandlelighting(hebrewDate) == 2)
+        //     {
+        //      //   printf("%-20.20s%s\n", "candle lighting: ", formattime(gettzais8p5(hebrewDate, here)));
+        //     //    printf("%-20.20s%s\n", "tzais: ", formattime(gettzais8p5(hebrewDate, here)));
+        //     } else if (isassurbemelachah(hebrewDate)){
+        //     //    printf("%-20.20s%s\n", "shabbos ends: ", formattime(gettzais8p5(hebrewDate, here)));
+        //     } else {
+        //    //     printf("%-20.20s%s\n", "tzais: ", formattime(gettzaisbaalhatanya(hebrewDate, here)));
+        //     }
+
         _disp->println(3, true, "%s", omer_count_name);
     }
 
@@ -189,7 +204,6 @@ public:
 
         _displayeddtv = dtv;
     }
-
 
     char getConfigMode(RTCLibWrapper::DatePart dp)
     {
@@ -222,9 +236,9 @@ public:
     }
 
 private:
-    IRTCLibWrapper::DateTimeValue _dtv=         {.year=0,.month=0,.day=0,.dayOfWeek=0,.hour=0,.minute=0,.second=0,.timestamp=0};
-    IRTCLibWrapper::DateTimeValue _displayeddtv={.year=0,.month=0,.day=0,.dayOfWeek=0,.hour=0,.minute=0,.second=0,.timestamp=0};
-    IRTCLibWrapper * _rtc;
+    IRTCLibWrapper::DateTimeValue _dtv = {.year = 0, .month = 0, .day = 0, .dayOfWeek = 0, .hour = 0, .minute = 0, .second = 0, .timestamp = 0};
+    IRTCLibWrapper::DateTimeValue _displayeddtv = {.year = 0, .month = 0, .day = 0, .dayOfWeek = 0, .hour = 0, .minute = 0, .second = 0, .timestamp = 0};
+    IRTCLibWrapper *_rtc;
     IRTCLibWrapper::DatePart _dp = IRTCLibWrapper::NONE;
     IDisplayWrapper *_disp;
     unsigned long _tickStamp = 0;

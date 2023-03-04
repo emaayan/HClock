@@ -16,6 +16,7 @@ void DisplayWrapper::init()
 void DisplayWrapper::lightUp()
 {
     _lcd.backlight();
+
 }
 
 void DisplayWrapper::println(uint8_t row, bool rtl, const char *fmt, ...)
