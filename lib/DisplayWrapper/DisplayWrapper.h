@@ -3,12 +3,15 @@
 
 #include <IDisplayWrapper.h>
 #include <Wire.h>
-#include <NoiascaHW/lcd_PCF8574.h> // I2C
+//#include <LiquidCrystal_I2C.h>
+ #include <NoiascaHW/lcd_PCF8574.h> // I2C
+#define DEF_ADDRESS 0X27
+#define DEF_COLS 20
+#define DEF_ROWS 4
 
 class DisplayWrapper : public IDisplayWrapper
 {
-public:
-    explicit DisplayWrapper(uint8_t address = DEF_ADDRESS, uint8_t cols = DEF_COLS, uint8_t rows = DEF_COLS);
+public:    
     void init() override;
     void lightUp() override;
     void println(uint8_t row, bool rtl, const char *fmt, ...) override;
@@ -16,8 +19,10 @@ public:
     void clear() override;
 
 private:
-    LiquidCrystal_PCF8574 _lcd;
-    uint8_t _cols;
-    uint8_t _rows;
+    void clearRow(uint8_t row,bool rtl);
+    uint8_t _cols=DEF_COLS;
+    uint8_t _rows=DEF_ROWS;
+    LiquidCrystal_PCF8574 _lcd=LiquidCrystal_PCF8574(DEF_ADDRESS,_cols,_rows,convert_SPLC780D1_015A);    
+    //LiquidCrystal_I2C _lcd=LiquidCrystal_I2C(DEF_ADDRESS,_cols,_rows);    
 };
 #endif

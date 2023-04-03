@@ -1,11 +1,7 @@
 #ifndef IDisplayWrapper_h
 #define IDisplayWrapper_h
-
+#include <stdint.h>
 #include <stdio.h>
-#define DEF_ADDRESS 0X27
-#define DEF_COLS 20
-#define DEF_ROWS 4
-
 
 class IDisplayWrapper
 {

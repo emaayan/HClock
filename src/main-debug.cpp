@@ -1,15 +1,24 @@
 #include <Arduino.h>
-// #include <Wire.h>
+#include <Wire.h>
+
+#include <RTCLibWrapper.h>
 
 
 #ifdef AVR_DEBUG
- #include <avr/io.h>
- #include <avr/interrupt.h>
+#include <avr/io.h>
+#include <avr/interrupt.h>
 #include <avr8-stub.h>
 #include <app_api.h>
 #endif
+
+IRTCLibWrapper *_rtc = new RTCLibWrapper();
+
+extern "C"
+{
 #include <hebrewcalendar.h>
- #include <hdateformat.h>
+#include <hdateformat.h>
+}
+
 void setup()
 {
 #ifdef AVR_DEBUG
@@ -29,25 +38,25 @@ void loop()
     // ltm.tm_wday = 5;
     // ltm.tm_yday = 19;
     // ltm.tm_isdst = 0;
-    //breakpoint();
-     hdate hebrewDate; //= convertDate(ltm);
-    hebrewDate.year=5783;
-    hebrewDate.month=2;
-    hebrewDate.day=14;
-    hebrewDate.hour=18;
-    hebrewDate.min=0;
-    hebrewDate.sec=41;
-    hebrewDate.msec=0;
-    hebrewDate.wday=6;
-    hebrewDate.dayofyear=22;
-    
-    parshah p=getparshah(hebrewDate);
-    
-    long int i =  HebrewCalendarElapsedDays(5783);// HebrewCalendarElapsedDays(5783);
-    if (i==0){
+    // breakpoint();
+    hdate hebrewDate; //= convertDate(ltm);
+    hebrewDate.year = 5783;
+    hebrewDate.month = 2;
+    hebrewDate.day = 14;
+    hebrewDate.hour = 18;
+    hebrewDate.min = 0;
+    hebrewDate.sec = 41;
+    hebrewDate.msec = 0;
+    hebrewDate.wday = 6;
+    hebrewDate.dayofyear = 22;
 
+    parshah p = getparshah(hebrewDate);
+
+    long int i = HebrewCalendarElapsedDays(5783); // HebrewCalendarElapsedDays(5783);
+    if (i == 0)
+    {
     }
-//     delay(i);
+    //     delay(i);
     // if (i == 0)
     // {
     // }
