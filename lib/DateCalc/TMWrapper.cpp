@@ -56,6 +56,7 @@ TMWrapper::TMWrapper(const year_t year, const month_t month, const day_t day, co
     _tm.tm_sec = second;
 }
 
+
 TMWrapper &TMWrapper::modifyYear(const delta_t delta)
 {
     _tm.tm_year = bounds(_tm.tm_year, 0, 999, delta);
@@ -105,13 +106,16 @@ char *TMWrapper::toDateTimeString(char *buffer, const size_t sz) const
 {
 
     const tm ltm = get_tm();
-    // strftime(buffer, sz, "%d/%m/%y %H:%M:%S", &ltm);
+    #ifdef DISP_SECS
+    strftime(buffer, sz, "%d/%m/%y %H:%M:%S", &ltm);
+    #else
     strftime(buffer, sz, "%d/%m/%y %H:%M", &ltm);
-    // snprintf(buffer,sz,"%d",ltm.tm_yday);
+    #endif
+    //  snprintf(buffer,sz,"%d",ltm.tm_yday);
     return buffer;
 }
 
-const int64_t differenceInSeconds(const tm& start, const tm& end)
+const int64_t differenceInSeconds(const tm &start, const tm &end)
 {
     tm f_ltm = start;
     tm t_ltm = end;
@@ -121,12 +125,12 @@ const int64_t differenceInSeconds(const tm& start, const tm& end)
     return (int64_t)diff;
 }
 
-long TMWrapper::diff(const TMWrapper& tm) const
+long TMWrapper::diff(const TMWrapper &tm) const
 {
     return differenceInSeconds(get_tm(), tm.get_tm());
 }
 
-const tm complete_tm(const tm& dtv)
+const tm complete_tm(const tm &dtv)
 {
     tm ltm = dtv;
     ltm.tm_wday = dayOfWeek(ltm.tm_year, ltm.tm_mon, ltm.tm_mday);

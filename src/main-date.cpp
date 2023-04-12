@@ -18,7 +18,7 @@ extern "C"
 #endif
 #include <DebugUtils.h>
 
-DisplayWrapper disp = DisplayWrapper();
+LCDDisplayWrapper disp = LCDDisplayWrapper();
 RTCLibWrapper rtc;
 void setup()
 {

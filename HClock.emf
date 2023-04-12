@@ -1,0 +1,66 @@
+{
+  "version": "1.00",
+  "projectName": "",
+  "author": "elhanan",
+  "items": [
+    {
+      "parentId": 0,
+      "type": "subMenu",
+      "item": {
+        "secured": false,
+        "name": "Config",
+        "variableName": "Config",
+        "id": 1,
+        "eepromAddress": -1,
+        "readOnly": false,
+        "localOnly": false,
+        "visible": true,
+        "staticDataInRAM": false
+      }
+    },
+    {
+      "parentId": 1,
+      "type": "textItem",
+      "defaultValue": "",
+      "item": {
+        "textLength": 5,
+        "itemType": "GREGORIAN_DATE",
+        "name": "Set Date",
+        "variableName": "ConfigSetDate",
+        "id": 2,
+        "eepromAddress": -1,
+        "readOnly": false,
+        "localOnly": false,
+        "visible": true,
+        "staticDataInRAM": false
+      }
+    }
+  ],
+  "codeOptions": {
+    "embeddedPlatform": "STM32DUINO",
+    "lastDisplayUuid": "",
+    "lastInputUuid": "",
+    "lastRemoteUuid": "",
+    "lastRemoteUuids": [
+      ""
+    ],
+    "lastThemeUuid": "",
+    "applicationUUID": "5cef02bc-7171-4d0b-bfaa-88db9290f006",
+    "applicationName": "JewishClock",
+    "lastProperties": [],
+    "namingRecursive": true,
+    "saveToSrc": false,
+    "useCppMain": true,
+    "usingSizedEEPROMStorage": true,
+    "eepromDefinition": "",
+    "authenticatorDefinition": "",
+    "projectIoExpanders": [
+      "deviceIO:"
+    ],
+    "menuInMenuCollection": {
+      "menuDefinitions": []
+    },
+    "packageNamespace": "",
+    "appIsModular": false
+  }
+}

@@ -4,13 +4,9 @@
 #include <DebugUtils.h>
 #include <IDisplayWrapper.h>
 #include <IRTCLibWrapper.h>
-#include <string.h>
-#include <stdlib.h>
-#include <stdbool.h>
-
 extern "C"
 {
-    #include <hebrewcalendar.h>
+    #include <HebDateDisplay.h>
 }
 
 typedef int32_t timestamp_t;
@@ -34,6 +30,7 @@ enum ConfigMode
     HOUR,
     MINUTE,
     SECOND,
+    BRIGHTNESS,
     LOCATION,
     TIMEZONE
 
@@ -53,19 +50,19 @@ public:
 
     void onTick(timestamp_t tick);
 
-    void displayMode(const ConfigMode mode);
-    void displayTime(const TMWrapper& dtv);    
-    hdate convertToHebrewDate( const TMWrapper& ltm) const;
-    void displayHebDate(const hdate& hebrewDate);
+    virtual void displayMode(const ConfigMode mode);
+    virtual void displayTime(const TMWrapper& dtv);        
+    virtual void displayHebDate(const HebDates &hebrewDate);
+
+protected:
+    IDisplayWrapper *_disp;
+    IRTCLibWrapper *_rtc;
 
 private:
-    
     TMWrapper _dtv = TMWrapper(0, 0, 0);
     TMWrapper _hebdtv = TMWrapper(0, 0, 0);
 
-    IRTCLibWrapper *_rtc;
     ConfigMode _dp = NONE;
-    IDisplayWrapper *_disp;
     timestamp_t _tickStamp = 0;
     ClockSettings _settings;
     const timestamp_t resolution = 50;

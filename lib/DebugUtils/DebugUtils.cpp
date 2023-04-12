@@ -7,10 +7,10 @@
 
 void debug(const char *fmt, ...)
 {
-  const size_t sz=50;
-  char buffer[sz] = "";
-    
+
 #ifdef DEBUG_AVR
+  const size_t sz = 50;
+  char buffer[sz] = "";
   va_list argptr;
   va_start(argptr, fmt);
   vsnprintf(buffer, sizeof(buffer), fmt, argptr);
@@ -18,6 +18,8 @@ void debug(const char *fmt, ...)
   debug_message(buffer);
 #endif
 #ifdef DEBUG_CON
+  const size_t sz = 50;
+  char buffer[sz] = "";
   va_list argptr;
   va_start(argptr, fmt);
   vsnprintf(buffer, sizeof(buffer), fmt, argptr);

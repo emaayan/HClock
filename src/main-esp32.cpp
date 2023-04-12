@@ -1,21 +1,34 @@
 #include <Arduino.h>
-#include <Wire.h>
-#include <OneButton.h>
-#include <Settings.h>
 
-#include <ClockController.h>
+#include <IRTCLibWrapper.h>
 #include <RTCLibWrapper.h>
-#include <DisplayWrapper.h>
 
-#include <DebugUtils.h>
+// #include <ClockController.h>
 
-#ifdef DEBUG_AVR
-#include <avr8-stub.h>
-#endif
+#include <IDisplayWrapper.h>
+#include <LCDDisplayWrapper.h>
 
-IDisplayWrapper *_disp = new DisplayWrapper();
+#include <OneButton.h>
+extern "C"
+{
+#include <HebDateDisplay.h>
+}
+
+IDisplayWrapper *_disp = new LCDDisplayWrapper();
 IRTCLibWrapper *_rtc = new RTCLibWrapper();
-ClockController clockControler(_disp, _rtc);
+
+enum ConfigMode
+{
+    NONE,
+    YEAR,
+    MONTH,
+    DAY,
+    HOUR,
+    MINUTE,
+    SECOND,
+    BRIGHTNESS
+};
+ConfigMode _dp = NONE;
 
 /* #region  Buttons */
 #ifndef RED_BUTTON
@@ -33,197 +46,278 @@ ClockController clockControler(_disp, _rtc);
 #define PULL_UP false
 #endif
 
-OneButton set_state_button(RED_BUTTON, PULL_UP);
-OneButton increase_button(GREEN_BUTTON, PULL_UP);
-OneButton decrease_button(BLUE_BUTTON, PULL_UP);
-
-void onExitConfigEnter()
-{
-  clockControler.changeMode(NONE);
-}
-void onInitConfigEnter()
-{
-  ConfigMode dp = clockControler.getMode();
-  if (dp != NONE)
-  {
-    onExitConfigEnter();
-  }
-  else
-  {
-    clockControler.changeMode(YEAR);
-  }
-}
-
-void onSwitchConfigMode()
-{
-
-  ConfigMode dp = clockControler.getMode();
-
-  switch (clockControler.getMode())
-  {
-  case YEAR:
-    dp = MONTH;
-    break;
-  case MONTH:
-    dp = DAY;
-    break;
-  case DAY:
-    dp = HOUR;
-    break;
-  case HOUR:
-    dp = MINUTE;
-    break;
-  case MINUTE:
-    dp = SECOND;
-    break;
-  case SECOND:
-    dp = NONE;
-    break;
-  default:
-    break;
-  }
-  clockControler.changeMode(dp);
-}
-
 #ifndef BRIGHTNESS_PIN
 #define BRIGHTNESS_PIN 6
 #endif
 
+OneButton set_state_button(RED_BUTTON, PULL_UP);
+OneButton increase_button(GREEN_BUTTON, PULL_UP);
+OneButton decrease_button(BLUE_BUTTON, PULL_UP);
+TMWrapper tmw = TMWrapper(0, 0, 0, 0, 0, 0);
+
+// char getConfigMode(const ConfigMode dp)
+// {
+//     switch (dp)
+//     {
+//     case NONE:
+//         return ' ';
+//     case YEAR:
+//         return 'Y';
+//     case MONTH:
+//         return 'M';
+//     case DAY:
+//         return 'D';
+//     case HOUR:
+//         return 'h';
+//     case MINUTE:
+//         return 'm';
+//     case SECOND:
+//         return 's';
+//     case BRIGHTNESS:
+//         return 'B';
+//     default:
+//         return ' ';
+//     }
+// }
+// void displayMode(const ConfigMode mode)
+// {
+//     const char confMode = getConfigMode(mode);
+//     const char c[2] = {confMode, '\0'};
+//     _disp->display(c, 19, 0, false);
+// }
+// void changeMode(const ConfigMode mode)
+// {
+//     displayMode(mode);
+//     _dp = mode;
+// }
+
+// void onExitConfigEnter()
+// {
+//     changeMode(NONE);
+// }
+// void onInitConfigEnter()
+// {
+
+//     if (_dp != NONE)
+//     {
+//         onExitConfigEnter();
+//     }
+//     else
+//     {
+//         changeMode(YEAR);
+//     }
+// }
+
+// void onSwitchConfigMode()
+// {
+//     switch (_dp)
+//     {
+//     case YEAR:
+//         _dp = MONTH;
+//         break;
+//     case MONTH:
+//         _dp = DAY;
+//         break;
+//     case DAY:
+//         _dp = HOUR;
+//         break;
+//     case HOUR:
+//         _dp = MINUTE;
+//         break;
+//     case MINUTE:
+//         _dp = SECOND;
+//         break;
+//     case SECOND:
+//         _dp = BRIGHTNESS;
+//         break;
+//     case BRIGHTNESS:
+//         _dp = NONE;
+//         break;
+//     default:
+//         break;
+//     }
+// }
+
 uint8_t brightness;
 const uint8_t brightAdjResolution = 10;
-const int BRIGHT_ADDR = 0;
-
+const int BRIGHT_ADDR = 1;
 void sendBrightness(uint8_t brightness)
 {
-  analogWrite(BRIGHTNESS_PIN, brightness);
+    analogWrite(BRIGHTNESS_PIN, brightness);
 }
 
 void initBrightness()
 {
-  pinMode(BRIGHTNESS_PIN, OUTPUT);
-  brightness = initSetting(BRIGHT_ADDR, 100);
-  sendBrightness(brightness);
-}
-
-/*
- *true increase, false decrease, every change write to EEPROM
- */
-uint8_t setBrightness(bool dir)
-{
-  int8_t i = dir ? -1 : 1; // this is because PNP transistor
-  int8_t setting = i * brightAdjResolution;
-  uint8_t curSetting = brightness;
-  uint8_t settingToBe = curSetting + setting;
-  if (settingToBe > 0 && settingToBe < 255)
-  {
-    brightness = settingToBe;
-    writeSetting(BRIGHT_ADDR, brightness);
+    pinMode(BRIGHTNESS_PIN, OUTPUT);
+    brightness = 150; //_confSettings->initSetting(BRIGHT_ADDR, 100);
     sendBrightness(brightness);
-  }
-  return brightness;
 }
 
-void incBrightness()
+// /*
+//  *true increase, false decrease, every change write to EEPROM
+//  */
+// uint8_t setBrightness(bool dir)
+// {
+//     int8_t i = dir ? -1 : 1; // this is because PNP transistor
+//     int8_t setting = i * brightAdjResolution;
+//     uint8_t curSetting = brightness;
+//     uint8_t settingToBe = curSetting + setting;
+//     if (settingToBe > 0 && settingToBe < 255)
+//     {
+//         brightness = settingToBe;
+//    //     _confSettings->writeSetting(BRIGHT_ADDR, brightness);
+//         sendBrightness(brightness);
+//     }
+//     return brightness;
+// }
+
+// void incBrightness()
+// {
+//     setBrightness(true);
+// }
+
+// void decBrightness()
+// {
+//     setBrightness(false);
+// }
+
+// TMWrapper change(const ConfigMode dp, TMWrapper &dtv, const delta_t dir)
+// {
+//     switch (dp)
+//     {
+//     case YEAR:
+//     {
+//         return dtv.modifyYear(dir);
+//     }
+//     case MONTH:
+//     {
+//         return dtv.modifyMonth(dir);
+//     }
+//     case DAY:
+//     {
+//         return dtv.modifyDay(dir);
+//     }
+//     case HOUR:
+//     {
+//         return dtv.modifyHour(dir);
+//     }
+//     case MINUTE:
+//     {
+//         return dtv.modifyMinute(dir);
+//     }
+//     case SECOND:
+//     {
+//         return dtv.modifySecond(dir);
+//     }
+//     default:
+//     {
+//         return dtv;
+//     }
+//     }
+//     return dtv;
+// }
+// void onIncrement()
+// {
+//     if (_dp != NONE && _dp != BRIGHTNESS)
+//     {
+//         tmw = change(_dp, tmw, 1); // clockController->increment();
+//         _rtc->changeTime(tmw);
+//     }
+//     else
+//     {
+//         if (_dp == BRIGHTNESS)
+//         {
+//              incBrightness();
+//         }
+//     }
+// }
+
+// void onDecrement()
+// {
+//     if (_dp != NONE && _dp != BRIGHTNESS)
+//     {
+//         tmw = change(_dp, tmw, -1); // clockController->increment();
+//         _rtc->changeTime(tmw);
+//     }
+//     else
+//     {
+//         if (_dp == BRIGHTNESS)
+//         {
+//              decBrightness();
+//         }
+//     }
+// }
+// void setupButtons()
+// {
+//     set_state_button.attachLongPressStart(onInitConfigEnter);
+//     set_state_button.attachClick(onSwitchConfigMode);
+
+//     increase_button.attachClick(onIncrement);
+//     increase_button.attachDuringLongPress(onIncrement);
+//     decrease_button.attachClick(onDecrement);
+//     decrease_button.attachDuringLongPress(onDecrement);
+// }
+
+
+void setupRTC()
 {
-  setBrightness(true);
+    _rtc->init();
 }
 
-void decBrightness()
+void setupDisp()
 {
-  setBrightness(false);
+   _disp->init();
+   _disp->lightUp();
+    initBrightness();
 }
 
-void onIncrement()
+void setup()
 {
-  ConfigMode dp = clockControler.getMode();
-  if (dp != NONE)
-  {
-    clockControler.increment();
-  }
-  else
-  {
-    //  incBrightness();
-  }
-}
-
-void onDecrement()
-{
-  ConfigMode dp = clockControler.getMode();
-  if (dp != NONE)
-  {
-    clockControler.decrement();
-  }
-  else
-  {
-    //    decBrightness();
-  }
-}
-
-void setupButtons()
-{
-  set_state_button.attachLongPressStart(onInitConfigEnter);
-  set_state_button.attachClick(onSwitchConfigMode);
-
-  increase_button.attachClick(onIncrement);
-  increase_button.attachDuringLongPress(onIncrement);
-
-  decrease_button.attachClick(onDecrement);
-  decrease_button.attachDuringLongPress(onDecrement);
+    Wire.begin();
+    setupRTC();
+    setupDisp();
+    // Serial.begin(115200);
+   // setupButtons();
 }
 
 void onTickButtons()
 {
-  set_state_button.tick();
-  increase_button.tick();
-  decrease_button.tick();
+    set_state_button.tick();
+    increase_button.tick();
+    decrease_button.tick();
 }
-/* #endregion */
-// unsigned long t;
-void setup()
-{
-#ifdef DEBUG_AVR
-  debug_init();
-#endif
-#ifdef DEBUG_CON
-  Serial.begin(115200);
-#endif
 
-  Wire.begin();
+unsigned long timstamp = 0;
 
-  ClockSettings settings;
-  setenv("TZ", "IST-2IDT,M3.4.4/26,M10.5.0", 1);
-  tzset();
-  settings.timezone = 2.0;
-  settings.isIsrael = 1;
-  settings.latitude = 32.109333;
-  settings.longitude = 34.855499;
-  settings.elevation = 34;
-  settings.calcTimes = true;
-  clockControler.init(settings);
-
-  //_rtc->changeTime(TMWrapper(123,2,27,23,23,0));
-
-  // initBrightness();
-  setupButtons();
-  // t=millis();
-}
+TMWrapper h_tmw = TMWrapper(0, 0, 0, 0, 0, 0);
 
 void onTick()
 {
-  onTickButtons();
-
-  clockControler.onTick(millis());
+    unsigned long ts = millis();
+    if (ts - timstamp > 60)
+    {
+        timstamp = millis();
+        tmw = _rtc->now();
+        char buff[18] = "";
+        tmw.toDateTimeString(buff, sizeof(buff));
+        _disp->println(0, false, "%-19s", buff);
+    //    displayMode(_dp);
+    }
+    if (abs(tmw.diff(h_tmw)) > 6000)
+    {
+        const tm tm = tmw.get_tm();
+        HebDates hr = {"", "", "", "", "", ""};
+         displayHebDates(tm, true, 2, &hr);
+      //  _disp->println(1, true, "%s, %s %s %s", hr.day_name, hr.dayInMonth, hr.monthName, hr.isNewMonthIndicator);
+        // _disp->println(2, true, "%s", hr.festivalName);
+        // _disp->println(3, true, "%s", hr.omer_count_name);
+        h_tmw = tmw;
+    }
+    onTickButtons();
 }
-
 void loop()
 {
-  // if (millis()-t>5000){
-  //   // clockControler.changeMode(MONTH);
-  //   // clockControler.increment();
-  //   t=millis();
-  // }
-  // t=millis();
-  // delay(1000);
 
-  onTick();
+    onTick();
+    // Serial.println(hd.day_name);
 }

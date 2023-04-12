@@ -1,7 +1,7 @@
 #include <Arduino.h>
 #include <hformat.h>
 
-
+#ifndef STD_C
 const char *p_yomtovformat(yomtov current)
 {
     switch (current)
@@ -107,9 +107,10 @@ const char *p_yomtovformat(yomtov current)
     return "\0";
 }
 
-char *displayFestival(const yomtov yom_tov, char *buff, size_t szBuff)
+char *displayFestival(const yomtov yom_tov, char *buff,  const size_t szBuff)
 {
     const char *yom_tov_name = p_yomtovformat(yom_tov);
     strncpy_P(buff, yom_tov_name, szBuff);
     return buff;
 }
+#endif
