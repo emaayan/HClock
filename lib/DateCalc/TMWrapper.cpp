@@ -46,6 +46,25 @@ uint16_t bounds(const int16_t v, const int16_t minVal, const int16_t maxVal, con
     }
 }
 
+TMWrapper::TMWrapper(const year_t year, const month_t month, const day_t day, const tm tm)
+{
+    _tm.tm_year = year;
+    _tm.tm_mon = month;
+    _tm.tm_mday = day;
+    _tm.tm_hour = tm.tm_hour;
+    _tm.tm_min = tm.tm_min;
+    _tm.tm_sec = tm.tm_sec;
+}
+
+TMWrapper::TMWrapper(const tm tm, const hour_t hour, const minute_t minute, const second_t second)
+{
+    _tm.tm_year = tm.tm_year;
+    _tm.tm_mon = tm.tm_mon;
+    _tm.tm_mday = tm.tm_mday;
+    _tm.tm_hour = hour;
+    _tm.tm_min = minute;
+    _tm.tm_sec = second;
+}
 TMWrapper::TMWrapper(const year_t year, const month_t month, const day_t day, const hour_t hour, const minute_t minute, const second_t second, const bool isDst)
 {
     _tm.tm_year = year;
@@ -55,7 +74,6 @@ TMWrapper::TMWrapper(const year_t year, const month_t month, const day_t day, co
     _tm.tm_min = minute;
     _tm.tm_sec = second;
 }
-
 
 TMWrapper &TMWrapper::modifyYear(const delta_t delta)
 {
@@ -106,12 +124,11 @@ char *TMWrapper::toDateTimeString(char *buffer, const size_t sz) const
 {
 
     const tm ltm = get_tm();
-    #ifdef DISP_SECS
+#ifdef DISP_SECS
     strftime(buffer, sz, "%d/%m/%y %H:%M:%S", &ltm);
-    #else
+#else
     strftime(buffer, sz, "%d/%m/%y %H:%M", &ltm);
-    #endif
-    //  snprintf(buffer,sz,"%d",ltm.tm_yday);
+#endif
     return buffer;
 }
 

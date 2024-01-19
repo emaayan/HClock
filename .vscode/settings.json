@@ -1,0 +1,6 @@
+{
+    "files.associations": {
+        "*.inc": "cpp"
+    },
+    "idf.portWin": "COM5"
+}

@@ -3,23 +3,26 @@
 #include <hebrewcalendar.h>
 #include <hdateformat.h>
 #include <zmanim.h>
+#include <shuir.h>
 
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
 
-hdate convertToHebDate(const struct tm tm, const bool isIsrael, const float tz)
+hdate convertToHebDate(const struct tm ltm, const bool isIsrael, const float tz)
 {
+    struct tm tm = ltm;
     hdate hebrewDate = convertDate(tm);
     setEY(&hebrewDate, isIsrael);
     const long int offset = (long int)3600 * tz;
     hebrewDate.offset = offset;
     return hebrewDate;
 }
-void displayHebDates(const struct tm tm, const bool isIsrael, const float tz, struct HebDates *hr)
+hdate displayHebDates(const struct tm tm, const bool isIsrael, const float tz, struct HebDates *hr)
 {
     const hdate hebrewDate = convertToHebDate(tm, isIsrael, tz);
     displayHebrewDates(&hebrewDate, hr);
+    return hebrewDate;
 }
 void displayDayName(const hdate *hebrewDate, struct HebDates *hr)
 {
@@ -27,29 +30,34 @@ void displayDayName(const hdate *hebrewDate, struct HebDates *hr)
     strncpy(hr->day_name, day_name, sizeof(hr->day_name));
 }
 
-void displayHebDayMonth(const hdate * hebrewDate, struct HebDates *hr)
+void displayHebDayMonth(const hdate *hebrewDate, struct HebDates *hr)
 {
     numtohchar(hr->dayInMonth, sizeof(hr->dayInMonth), hebrewDate->day);
     const char *monthName = numtohmonth(hebrewDate->month, hebrewDate->leap);
     strncpy(hr->monthName, monthName, sizeof(hr->monthName));
 }
 
+bool isMacharRoshChodesh(const hdate *hebrewDate)
+{
+    return hebrewDate->day == 29 && hebrewDate->month != 6;
+}
+
 void displayNewMonth(const hdate *hebrewDate, struct HebDates *hr)
 {
-    char isNewMonthIndicator[9 + 1] = "";
+    char isNewMonthIndicator[16 + 1] = "";
     const size_t sz_month = sizeof(isNewMonthIndicator);
-    const yomtov shabat_mevarchim = getshabbosmevorchim(*hebrewDate);
-    const yomtov isNewMonth = getroshchodesh(*hebrewDate);
-    if (shabat_mevarchim != CHOL)
+    if (isMacharRoshChodesh(hebrewDate))
     {
-        //molad molad = getmolad(hebrewDate.year, hebrewDate.month+1);                
-        const char *buf = "מולד";
-        strncpy(isNewMonthIndicator, buf, sz_month);
+        strncpy(isNewMonthIndicator, ",מחר ר\"ח", sz_month);
     }
-    else if (isNewMonth != CHOL)
+    else if (getroshchodesh(*hebrewDate) == ROSH_CHODESH)
     {
-        const char *buf = ",ר\"ח";
-        strncpy(isNewMonthIndicator, buf, sz_month);
+        strncpy(isNewMonthIndicator, ",ר\"ח", sz_month);
+    }
+    else if (getshabbosmevorchim(*hebrewDate) == SHABBOS_MEVORCHIM)
+    {
+        // molad molad = getmolad(hebrewDate.year, hebrewDate.month+1);
+        strncpy(isNewMonthIndicator, ",מולד", sz_month);
     }
     else
     {
@@ -64,7 +72,7 @@ void displayHebrewDates(const hdate *hebrewDate, struct HebDates *hr)
     displayHebDayMonth(hebrewDate, hr);
     displayNewMonth(hebrewDate, hr);
     displayHebFestival(hebrewDate, hr);
-    displayOmer(hebrewDate, hr);    
+    displayOmer(hebrewDate, hr);
 }
 
 char *displayFestival_std(const yomtov yom_tov, char *buff, size_t szBuff)
@@ -112,7 +120,50 @@ char *formattime(const hdate date, char *buff, size_t sz)
     time_t time = hdatetime_t(date);
     struct tm *tm = localtime(&time);
     strftime(buff, sz, "%H:%M", tm);
+    // snprintf(buff,sz,"%d:%d",date.hour,date.min);
     return buff;
+}
+
+parshah get_parahsa_name(const hdate *hDate)
+{
+    parshah par = getparshah(*hDate);
+    if (!par)
+    {
+        hdate shabbos = *hDate;
+        hdateaddday(&shabbos, (7 - hDate->wday));
+        par = getparshah(shabbos);
+    }
+    return par;
+}
+
+void displayScripture(const hdate *hDate, struct Scripture *scripture)
+{
+    if (getbirchashashanim(*hDate))
+    {
+        strncpy(scripture->season, "ותן טל ומטר", sizeof(scripture->season));
+    }
+    else
+    {
+        strncpy(scripture->season, "ותן ברכה", sizeof(scripture->season));
+    }
+
+    const size_t parasha_sz = sizeof(scripture->parasha);
+    char par_name[PARASHSA_SZ] = "";
+    parshah par = get_parahsa_name(hDate);
+    if (par)
+    {
+        strncpy(par_name, parshahformat(par), parasha_sz);
+    }
+
+    const int avos = getavos(*hDate);
+    if ((avos))
+    {
+        sniprintf(scripture->avos, sizeof(scripture->avos), "%-15.15sאבות פרק %s", avosformat(avos));
+    }
+    chumash(*hDate,scripture->chumashbuf);
+    
+    tehillim(*hDate,scripture->tehillimbuf);
+
 }
 
 void displayTimes(const hdate *hDate, location here, struct HebTimes *hebTimes)
@@ -123,22 +174,29 @@ void displayTimes(const hdate *hDate, location here, struct HebTimes *hebTimes)
     formattime(gettefilabaalhatanya(hebrewDate, here), hebTimes->tefila, sizeof(hebTimes->tefila));
     formattime(getsunrise(hebrewDate, here), hebTimes->sunrise, sizeof(hebTimes->sunrise));
     formattime(getsunset(hebrewDate, here), hebTimes->sunset, sizeof(hebTimes->sunset));
+    formattime(getminchagedolabaalhatanya(hebrewDate, here), hebTimes->minhca, sizeof(hebTimes->minhca));
+    formattime(getchatzosbaalhatanya(hebrewDate, here), hebTimes->chatzos, sizeof(hebTimes->chatzos));
 
-    if (iscandlelighting(hebrewDate) == 1)
+    const int candleType = iscandlelighting(hebrewDate);
+    switch (candleType)
     {
+    case 1: // SHABAT_ENTRY
         formattime(getcandlelighting(hebrewDate, here), hebTimes->candleLight, sizeof(hebTimes->candleLight));
+        break;
+    case 2: // NIGHT_FALL
+        if (!isassurbemelachah(hebrewDate))
+        {
+            formattime(getcandlelighting(hebrewDate, here), hebTimes->candleLight, sizeof(hebTimes->candleLight));
+        }
+        break;
+    case 3:
+        formattime(gettzaisbaalhatanya(hebrewDate, here), hebTimes->candleLight, sizeof(hebTimes->candleLight));
+        break;
+    default:
+        break;
     }
-
-    if (iscandlelighting(hebrewDate) == 2)
+    if (isassurbemelachah(hebrewDate))
     {
-        formattime(gettzais8p5(hebrewDate, here), hebTimes->tzais, sizeof(hebTimes->tzais));
-    }
-    else if (isassurbemelachah(hebrewDate))
-    {
-        formattime(gettzais8p5(hebrewDate, here), hebTimes->tzais, sizeof(hebTimes->tzais));
-    }
-    else
-    {
-        formattime(gettzaisbaalhatanya(hebrewDate, here), hebTimes->tzais, sizeof(hebTimes->tzais));
+        formattime(gettzais8p5(hebrewDate, here), hebTimes->endFestival, sizeof(hebTimes->endFestival));
     }
 }

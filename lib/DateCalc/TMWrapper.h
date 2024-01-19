@@ -30,6 +30,8 @@ class TMWrapper
 {
 
 public:
+    TMWrapper(const year_t year, const month_t month, const day_t day,const tm tm);
+    TMWrapper(const tm tm, const hour_t hour, const minute_t minute, const second_t second);
     TMWrapper(const year_t year, const month_t month, const day_t day, hour_t hour = 0, minute_t minute = 0, second_t second = 0, bool isDst = false);
     explicit TMWrapper(const tm tm);    
     TMWrapper &modifyYear(const delta_t delta);
