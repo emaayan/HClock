@@ -5,6 +5,7 @@
 #include <RTCLibWrapper.h>
 #include <U8g2lib.h>
 
+//#include <OledDisplayWrapper.h>
 extern "C"
 {
 #include <HebDateDisplay.h>
@@ -14,12 +15,16 @@ extern "C"
 #define DC 17    // 16
 #define RESET 16 // 4 // 17
 
-U8G2_SSD1309_128X64_NONAME0_F_4W_HW_SPI _disp(U8G2_R0, CS, DC, RESET);
+U8G2_SSD1309_128X64_NONAME0_F_4W_HW_SPI _disp(U8G2_R0, CS, DC, RESET); 
+// OledDisplayWrapper _disp;
 RTCLibWrapper _rtc = RTCLibWrapper();
 const uint8_t COLOR_INDEX = 1; // WHITE
 void init()
 {
+//    SPI.begin(SCK, MISO, MOSI, SS);
     _rtc.init();
+
+    //    _disp.init();
 
     _disp.begin();
     _disp.setDrawColor(COLOR_INDEX);
@@ -30,12 +35,15 @@ void init()
 u8g2_uint_t writeUTF8(const uint8_t *font, const u8g2_uint_t line, const u8g2_uint_t x, const char *buff, bool rtl = false)
 {
     _disp.setFont(font);
+    //_disp.display(buff, x, line, rtl);
     return _disp.drawExtUTF8(x, line, rtl ? 1 : 0, NULL, buff);
 }
 
 u8g2_uint_t writeUTF8(const uint8_t *font, const u8g2_uint_t line, const char *buff, bool rtl = false)
 {
     const u8g2_uint_t x = rtl ? 128 : 0;
+    //_disp.setFont(font);
+    //_disp.display(buff, x, line, rtl);
     return writeUTF8(font, line, x, buff, rtl);
 }
 
@@ -51,6 +59,7 @@ uint16_t writeMessage(const char *fmt, ...)
     _disp.clear();
     u8g2_uint_t t = _disp.drawStr(0, sz, buffer);
     _disp.sendBuffer();
+    // size_t t = _disp.println(0, false, buffer);
     return t;
 }
 
@@ -66,6 +75,7 @@ uint16_t writeMessage(u8g2_uint_t x, u8g2_uint_t y, const char *fmt, ...)
     _disp.clear();
     u8g2_uint_t t = _disp.drawStr(x, y, buffer);
     _disp.sendBuffer();
+    // size_t t = _disp.println(0, false, buffer);
     return t;
 }
 
@@ -156,7 +166,7 @@ void leftScreen(const HebDates hr, HebTimes ht)
     // writeTime(ht.sunset, ":ש", 60, 25);
 }
 
-void rigthScreen(Scripture scripture)
+void rightScreen(Scripture scripture)
 {
     writeUTF8(_heb_font, 36, scripture.season, true);
 
@@ -187,6 +197,34 @@ void setNow(TMWrapper tmw)
 {
     _rtc.changeTime(tmw);
 }
+void onPageLoop(const TMWrapper tmw, HebDates hr, HebTimes ht, Scripture scr)
+{
+    char dt[18] = "";
+    tmw.toDateTimeString(dt, sizeof(dt));
+
+    writeUTF8(_num_font, 15, dt);
+    writeUTF8(_heb_font, 15, hr.day_name, true);
+
+    char dayMonth[50 + 1] = "";
+    snprintf(dayMonth, sizeof(dayMonth), "%s ב%s %s", hr.dayInMonth, hr.monthName, hr.isNewMonthIndicator);
+
+    writeUTF8(_heb_font, 25, dayMonth, true);
+
+    switch (_screen_state)
+    {
+    case 0:
+        mainScreen(hr, ht);
+        break;
+    case 1:
+        leftScreen(hr, ht);
+        break;
+    case 2:
+        rightScreen(scr);
+        break;
+    default:
+        break;
+    }
+}
 void display()
 {
 
@@ -202,39 +240,16 @@ void display()
     displayTimes(&hd, _loc, &ht);
     Scripture scr = {"", "", "", "", ""};
     displayScripture(&hd, &scr);
+    
     _disp.setDrawColor(COLOR_INDEX);
     _disp.firstPage();
 
     do
     {
+        onPageLoop(tmw, hr, ht, scr);
+    }
 
-        char dt[18] = "";
-        tmw.toDateTimeString(dt, sizeof(dt));
-
-        writeUTF8(_num_font, 15, dt);
-        writeUTF8(_heb_font, 15, hr.day_name, true);
-
-        char dayMonth[50 + 1] = "";
-        snprintf(dayMonth, sizeof(dayMonth), "%s ב%s %s", hr.dayInMonth, hr.monthName, hr.isNewMonthIndicator);
-
-        writeUTF8(_heb_font, 25, dayMonth, true);
-
-        switch (_screen_state)
-        {
-        case 0:
-            mainScreen(hr, ht);
-            break;
-        case 1:
-            leftScreen(hr, ht);
-            break;
-        case 2:
-            rigthScreen(scr);
-            break;
-        default:
-            break;
-        }
-
-    } while (_disp.nextPage());
+    while (_disp.nextPage());
 }
 
 #endif /* D5B23716_949F_4659_9C38_BE5BA7298569 */

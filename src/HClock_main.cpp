@@ -189,7 +189,7 @@ void setupButtons()
 
 void setup()
 {
-
+    
     setupButtons();
     bool r = initFS();
     if (r)
@@ -223,10 +223,13 @@ void setup()
     {
         writeMessage("Failed %s", "File System");
     }
+ //   Serial.begin(115200);
+//   Serial.println("Starting");
 }
 
 void loop()
 {
+   // Serial.println("Hello");
     if (ret)
     {
         onTickButtons();

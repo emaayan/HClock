@@ -2,5 +2,5 @@
 
 bool initFS()
 {
-    return LittleFS.begin(false);
+    return LittleFS.begin(true);
 }

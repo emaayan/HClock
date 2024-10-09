@@ -158,12 +158,11 @@ void displayScripture(const hdate *hDate, struct Scripture *scripture)
     const int avos = getavos(*hDate);
     if ((avos))
     {
-        sniprintf(scripture->avos, sizeof(scripture->avos), "%-15.15sאבות פרק %s", avosformat(avos));
+        const char* avos_str=avosformat(avos);        
+        snprintf(scripture->avos, sizeof(scripture->avos), "%-15.15s %s","אבות פרק",avos_str);
     }
     chumash(*hDate,scripture->chumashbuf);
-    
-    tehillim(*hDate,scripture->tehillimbuf);
-
+    tehillim(*hDate,scripture->tehillimbuf);//removed \n from source
 }
 
 void displayTimes(const hdate *hDate, location here, struct HebTimes *hebTimes)
