@@ -146,6 +146,8 @@ void displayCallback(unsigned int encoderValue, RenderPressMode clicked)
     {
         inMenu = false;
         display();
+         // Optional: yield if using task manager to avoid blocking
+         //taskManager.yieldForMicros(1000);
     }
 }
 void increaseDate()
@@ -224,7 +226,7 @@ void setup()
         writeMessage("Failed %s", "File System");
     }
  //   Serial.begin(115200);
-//   Serial.println("Starting");
+   //   Serial.println("Starting");
 }
 
 void loop()
@@ -233,7 +235,7 @@ void loop()
     if (ret)
     {
         onTickButtons();
-        //    display();
+   //    display();    
         taskManager.runLoop();
     }
 }

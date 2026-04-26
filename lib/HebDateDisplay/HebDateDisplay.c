@@ -175,27 +175,43 @@ void displayTimes(const hdate *hDate, location here, struct HebTimes *hebTimes)
     formattime(getsunset(hebrewDate, here), hebTimes->sunset, sizeof(hebTimes->sunset));
     formattime(getminchagedolabaalhatanya(hebrewDate, here), hebTimes->minhca, sizeof(hebTimes->minhca));
     formattime(getchatzosbaalhatanya(hebrewDate, here), hebTimes->chatzos, sizeof(hebTimes->chatzos));
+    formattime(getplagbaalhatanya(hebrewDate, here), hebTimes->plug_hamincha, sizeof(hebTimes->plug_hamincha));
+
+    hdate tzais;
 
     const int candleType = iscandlelighting(hebrewDate);
     switch (candleType)
     {
-    case 1: // SHABAT_ENTRY
+    case 1: // SHABAT_ENTRY    
         formattime(getcandlelighting(hebrewDate, here), hebTimes->candleLight, sizeof(hebTimes->candleLight));
+        tzais=gettzaisbaalhatanya(hebrewDate, here);
         break;
-    case 2: // NIGHT_FALL
+    case 2: // FESTIVAL
         if (!isassurbemelachah(hebrewDate))
         {
             formattime(getcandlelighting(hebrewDate, here), hebTimes->candleLight, sizeof(hebTimes->candleLight));
         }
+        tzais=gettzais8p5(hebrewDate, here);
         break;
-    case 3:
-        formattime(gettzaisbaalhatanya(hebrewDate, here), hebTimes->candleLight, sizeof(hebTimes->candleLight));
+    case 3://hanuka
+        if (!isassurbemelachah(hebrewDate))
+        {
+            tzais=gettzaisbaalhatanya(hebrewDate, here);    
+        }
+        else
+        {
+            tzais=gettzais8p5(hebrewDate, here);    
+        }
+        formattime(gettzaisbaalhatanya(hebrewDate, here), hebTimes->candleLight, sizeof(hebTimes->candleLight));        
         break;
-    default:
+    default: //REGULAR days
+        tzais=gettzaisbaalhatanya(hebrewDate, here);    
         break;
     }
+
+    formattime(tzais, hebTimes->tzais, sizeof(hebTimes->tzais));
     if (isassurbemelachah(hebrewDate))
     {
-        formattime(gettzais8p5(hebrewDate, here), hebTimes->endFestival, sizeof(hebTimes->endFestival));
+       formattime(gettzais8p5(hebrewDate, here), hebTimes->endFestival, sizeof(hebTimes->endFestival));
     }
 }

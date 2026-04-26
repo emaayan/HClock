@@ -26,6 +26,7 @@ struct HebTimes
     char endFestival[TIME_SZ];
     char tzais[TIME_SZ];
     char chatzos[TIME_SZ];
+    char plug_hamincha[TIME_SZ];
 
 } typedef HebTimes;
 #define PARASHSA_SZ 40

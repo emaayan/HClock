@@ -8,6 +8,7 @@ public:
     virtual void init() = 0;
     virtual TMWrapper now() = 0;
     virtual void changeTime(TMWrapper dtv) = 0;
+    virtual float getTemperature() = 0;
 };
 
 #endif

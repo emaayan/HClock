@@ -40,3 +40,8 @@ void RTCLibWrapper::changeTime(const TMWrapper dtv)
     DateTime dt = fromDateTimeValue(dtv);
     _rtcCtrl.adjust(dt);
 }
+
+float RTCLibWrapper::getTemperature() 
+{
+    return _rtcCtrl.getTemperature();
+}

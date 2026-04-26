@@ -13,6 +13,7 @@ public:
     void init() override;
     TMWrapper now() override;
     void changeTime(TMWrapper dtv) override;
+    float getTemperature() override;
 
 private:
     RTC_DS3231 _rtcCtrl;

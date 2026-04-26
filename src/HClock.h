@@ -21,11 +21,7 @@ RTCLibWrapper _rtc = RTCLibWrapper();
 const uint8_t COLOR_INDEX = 1; // WHITE
 void init()
 {
-//    SPI.begin(SCK, MISO, MOSI, SS);
     _rtc.init();
-
-    //    _disp.init();
-
     _disp.begin();
     _disp.setDrawColor(COLOR_INDEX);
     _disp.clearBuffer();
@@ -109,7 +105,8 @@ static const uint8_t *_num_font = u8g2_font_5x7_tr;
 static const uint8_t *_heb_font = u8g2_font_6x13_t_hebrew;
 void writeTime(char *hebtime, const char *title, int x, int y)
 {
-    const size_t sz = (sizeof(title) / 2) - 1;
+    const size_t sz =  1;// (sizeof(title) / 2) - 1;
+    //const size_t sz = strlen(title);  
     writeUTF8(_heb_font, x, y, title, false);
     writeUTF8(_num_font, x, y - (sz * 25), hebtime);
 }
@@ -143,17 +140,18 @@ void mainScreen(const HebDates hr, HebTimes ht)
     if (strlen(ht.candleLight) > 0)
     {
         writeTime(ht.candleLight, ":נ\"ה", 35, 25);
-    }
+    }   
     else if (strlen(ht.endFestival) > 0)
     {
-        writeTime(ht.endFestival, ":צ", 35, 25);
+        writeTime(ht.endFestival,  ":צומ", 35, 25);//  צאת שבת/חג
     }
 
     writeUTF8(_heb_font, 45, hr.omer_count_name, true);
 
-    writeTime(ht.minhca, ":ג\"מ", 47, 25);
+    writeTime(ht.plug_hamincha, ":מ\"פ", 47, 25);
     writeTime(ht.sunrise, ":ץנ", 60, 105);
-    writeTime(ht.sunset, ":'קש", 60, 25);
+    writeTime(ht.tzais, ":כ\"צ", 60, 25); 
+    // writeTime(ht.sunset, ":'קש", 60, 25);
 }
 
 void leftScreen(const HebDates hr, HebTimes ht)
@@ -170,7 +168,7 @@ void rightScreen(Scripture scripture)
 {
     writeUTF8(_heb_font, 36, scripture.season, true);
 
-    if (strnlen(scripture.parasha, sizeof(scripture.parasha) > 0))
+    if (strnlen(scripture.parasha, sizeof(scripture.parasha)) > 0)
     {
         writeUTF8(_heb_font, 48, scripture.parasha, true);
     }
@@ -179,7 +177,7 @@ void rightScreen(Scripture scripture)
         writeUTF8(_heb_font, 48, scripture.chumashbuf, true);
     }
 
-    if (strnlen(scripture.avos, sizeof(scripture.avos) > 0))
+    if (strnlen(scripture.avos, sizeof(scripture.avos))> 0)
     {
         writeUTF8(_heb_font, 60, scripture.avos, true);
     }
@@ -197,12 +195,14 @@ void setNow(TMWrapper tmw)
 {
     _rtc.changeTime(tmw);
 }
-void onPageLoop(const TMWrapper tmw, HebDates hr, HebTimes ht, Scripture scr)
+void onPageLoop(const TMWrapper tmw,float temp, HebDates hr, HebTimes ht, Scripture scr)
 {
-    char dt[18] = "";
+    char dt[15] = "";
     tmw.toDateTimeString(dt, sizeof(dt));
+    char l1[22] = "";
+    snprintf(l1, sizeof(l1), "%s %.0fC",dt, temp);
 
-    writeUTF8(_num_font, 15, dt);
+    writeUTF8(_num_font, 15, l1);
     writeUTF8(_heb_font, 15, hr.day_name, true);
 
     char dayMonth[50 + 1] = "";
@@ -225,31 +225,36 @@ void onPageLoop(const TMWrapper tmw, HebDates hr, HebTimes ht, Scripture scr)
         break;
     }
 }
+
 void display()
 {
 
     const TMWrapper tmw = _rtc.now();
     const tm tm = tmw.get_tm();
-    if (abs(tmw.diff(_tmw)) > 60)
+    long diff=abs(tmw.diff(_tmw));
+    if (diff > 60)
     {
         _tmw = tmw;
     }
-    HebDates hr = {"", "", "", "", "", ""};
-    const hdate hd = displayHebDates(tm, _isIsrael, _tz, &hr);
-    HebTimes ht = {"", "", "", "", "", "", "", "", "", ""};
-    displayTimes(&hd, _loc, &ht);
-    Scripture scr = {"", "", "", "", ""};
-    displayScripture(&hd, &scr);
     
-    _disp.setDrawColor(COLOR_INDEX);
-    _disp.firstPage();
-
-    do
+   // if(diff>2)//2 seconds to have responsive for screen changes
     {
-        onPageLoop(tmw, hr, ht, scr);
+        HebDates hr = {"", "", "", "", "", ""};
+        const hdate hd = displayHebDates(tm, _isIsrael, _tz, &hr);
+        HebTimes ht = {"", "", "", "", "", "", "", "", "", ""};
+        displayTimes(&hd, _loc, &ht);
+        Scripture scr = {"", "", "", "", ""};
+        displayScripture(&hd, &scr);
+        
+        const float temp=_rtc.getTemperature();
+        _disp.setDrawColor(COLOR_INDEX);         
+        _disp.firstPage();
+        do
+        {
+            onPageLoop(tmw,temp, hr, ht, scr);
+        }
+        while (_disp.nextPage());
     }
-
-    while (_disp.nextPage());
 }
 
 #endif /* D5B23716_949F_4659_9C38_BE5BA7298569 */
