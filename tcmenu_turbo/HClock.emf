@@ -1,0 +1,244 @@
+{
+  "version": "1.00",
+  "projectName": "Jewish clock",
+  "author": "WebApp",
+  "items": [
+    {
+      "parentId": "0",
+      "type": "textItem",
+      "item": {
+        "textLength": 5,
+        "itemType": "GREGORIAN_DATE",
+        "name": "Set Date",
+        "variableName": "SetDate",
+        "id": 1,
+        "eepromAddress": -1,
+        "functionName": "onSetDate",
+        "readOnly": false,
+        "localOnly": false,
+        "visible": true,
+        "staticDataInRAM": false
+      },
+      "defaultValue": ""
+    },
+    {
+      "parentId": "0",
+      "type": "textItem",
+      "item": {
+        "textLength": 5,
+        "itemType": "TIME_24H_HHMM",
+        "name": "Set Time",
+        "variableName": "SetTime",
+        "id": 3,
+        "eepromAddress": -1,
+        "functionName": "onSetTime",
+        "readOnly": false,
+        "localOnly": false,
+        "visible": true,
+        "staticDataInRAM": false
+      },
+      "defaultValue": ""
+    },
+    {
+      "parentId": "0",
+      "type": "subMenu",
+      "item": {
+        "secured": false,
+        "name": "Location",
+        "variableName": "Location",
+        "id": 4,
+        "eepromAddress": -1,
+        "readOnly": false,
+        "localOnly": false,
+        "visible": true,
+        "staticDataInRAM": false,
+        "functionName": ""
+      },
+      "defaultValue": "false"
+    },
+    {
+      "parentId": "4",
+      "type": "runtimeList",
+      "item": {
+        "initialRows": 10,
+        "listCreationMode": "CUSTOM_RTCALL",
+        "name": "Set Country",
+        "variableName": "Country",
+        "id": 5,
+        "eepromAddress": -1,
+        "functionName": "",
+        "readOnly": false,
+        "localOnly": false,
+        "visible": true,
+        "staticDataInRAM": false
+      },
+      "defaultValue": "0"
+    },
+    {
+      "parentId": "4",
+      "type": "runtimeList",
+      "item": {
+        "initialRows": 0,
+        "listCreationMode": "CUSTOM_RTCALL",
+        "name": "Set City",
+        "variableName": "City",
+        "id": 6,
+        "eepromAddress": -1,
+        "functionName": "",
+        "readOnly": false,
+        "localOnly": false,
+        "visible": true,
+        "staticDataInRAM": false
+      },
+      "defaultValue": "0"
+    },
+    {
+      "parentId": "0",
+      "type": "actionMenu",
+      "item": {
+        "name": "Exit",
+        "variableName": "Exit",
+        "id": 2,
+        "eepromAddress": -1,
+        "functionName": "onExit",
+        "readOnly": false,
+        "localOnly": false,
+        "visible": true,
+        "staticDataInRAM": false
+      },
+      "defaultValue": "false"
+    }
+  ],
+  "codeOptions": {
+    "embeddedPlatform": "ARDUINO_ESP32",
+    "lastDisplayUuid": "8646497b-1427-415f-8020-1260a1fef57d",
+    "lastInputUuid": "2a3ae3ba-05f4-4c9c-aad3-3ddc88df9049",
+    "lastRemoteUuids": [
+      "2c101fec-1f7d-4ff3-8d2b-992ad41e7fcb"
+    ],
+    "lastThemeUuid": "8D9B49C7-FD28-4533-9B00-21A4184BB0C9",
+    "applicationUUID": "5cef02bc-7171-4d0b-bfaa-88db9290f006",
+    "applicationName": "HClock",
+    "lastProperties": [
+      {
+        "name": "SW_POLLING_MODE",
+        "latestValue": "SWITCHES_POLL_EVERYTHING",
+        "subsystem": "INPUT"
+      },
+      {
+        "name": "SWITCH_IODEVICE",
+        "latestValue": "devicePins",
+        "subsystem": "INPUT"
+      },
+      {
+        "name": "ENCODER_UP_PIN",
+        "latestValue": "25",
+        "subsystem": "INPUT"
+      },
+      {
+        "name": "ENCODER_DOWN_PIN",
+        "latestValue": "26",
+        "subsystem": "INPUT"
+      },
+      {
+        "name": "ENCODER_BACK_PIN",
+        "latestValue": "-1",
+        "subsystem": "INPUT"
+      },
+      {
+        "name": "ENCODER_NEXT_PIN",
+        "latestValue": "-1",
+        "subsystem": "INPUT"
+      },
+      {
+        "name": "ENCODER_OK_PIN",
+        "latestValue": "27",
+        "subsystem": "INPUT"
+      },
+      {
+        "name": "ENC_KEY_REPEAT",
+        "latestValue": "20",
+        "subsystem": "INPUT"
+      },
+      {
+        "name": "PULLUP_LOGIC",
+        "latestValue": "true",
+        "subsystem": "INPUT"
+      },
+      {
+        "name": "DISPLAY_VARIABLE",
+        "latestValue": "_disp",
+        "subsystem": "DISPLAY"
+      },
+      {
+        "name": "DISPLAY_TYPE",
+        "latestValue": "U8G2_SSD1309_128X64_NONAME0_F_4W_HW_SPI",
+        "subsystem": "DISPLAY"
+      },
+      {
+        "name": "DISPLAY_CONFIG",
+        "latestValue": "",
+        "subsystem": "DISPLAY"
+      },
+      {
+        "name": "UPDATES_PER_SEC",
+        "latestValue": "10",
+        "subsystem": "DISPLAY"
+      },
+      {
+        "name": "YIELDING_WIRE_CB",
+        "latestValue": "false",
+        "subsystem": "DISPLAY"
+      },
+      {
+        "name": "USE_UTF8_SUPPORT",
+        "latestValue": "false",
+        "subsystem": "DISPLAY"
+      },
+      {
+        "name": "ITEM_FONT",
+        "latestValue": "def:,1",
+        "subsystem": "THEME"
+      },
+      {
+        "name": "TITLE_FONT",
+        "latestValue": "def:,1",
+        "subsystem": "THEME"
+      },
+      {
+        "name": "TITLE_HEADER_PADDING",
+        "latestValue": "2",
+        "subsystem": "THEME"
+      },
+      {
+        "name": "TITLE_TO_ITEM_SPACING",
+        "latestValue": "2",
+        "subsystem": "THEME"
+      },
+      {
+        "name": "TITLE_SHOW_MODE",
+        "latestValue": "TITLE_FIRST_ROW",
+        "subsystem": "THEME"
+      },
+      {
+        "name": "USE_TC_UNICODE",
+        "latestValue": "false",
+        "subsystem": "THEME"
+      }
+    ],
+    "namingRecursive": false,
+    "saveLocation": "ONE_SINGLE_FILE_MENU_MAIN",
+    "useCppMain": true,
+    "usingSizedEEPROMStorage": false,
+    "eepromSaveMode": "DYNAMIC_WRITE_BY_ID",
+    "eepromDefinition": "",
+    "authenticatorDefinition": "",
+    "projectIoExpanders": [],
+    "useDynamicMenus": true,
+    "menuInMenuCollection": {
+      "menuDefinitions": []
+    },
+    "i18nEnabled": false
+  },
+  "stringLists": []
+}

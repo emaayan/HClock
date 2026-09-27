@@ -20,7 +20,14 @@
 
 // variables we declare that you may need to access
 extern const PROGMEM ConnectorLocalInfo applicationInfo;
+// NOTE (manual edit): _disp type is selected by build flag so both the 2.42"
+// (SSD1309) and 2.7" (SSD1363) screens are supported - keep in sync with HClock.h.
+// If you regenerate this file from the tcMenu Designer, re-apply this conditional.
+#if defined(DISPLAY_SSD1363)
+extern U8G2_SSD1363_256X128_F_4W_HW_SPI _disp;
+#else
 extern U8G2_SSD1309_128X64_NONAME0_F_4W_HW_SPI _disp;
+#endif
 extern U8g2Drawable _dispDrawable;
 extern GraphicsDeviceRenderer renderer;
 

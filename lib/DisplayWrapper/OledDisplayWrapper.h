@@ -16,8 +16,9 @@ public:
     {
         _disp.begin();
         _disp.setDrawColor(COLOR_INDEX);
-        _disp.clearBuffer();
+        _disp.clearBuffer();        
         _disp.setFont(u8g2_font_ncenB08_tr);
+        _disp.display.clear();
     };
 
     void lightUp() override{
@@ -82,7 +83,13 @@ public:
     }
 
 private:
+    // Display selected by build flag - keep in sync with HClock.h.
+    // NOTE: this wrapper is currently unused (the abandoned IDisplayWrapper path).
+#if defined(DISPLAY_SSD1363)
+    U8G2_SSD1363_256X128_F_4W_HW_SPI _disp = U8G2_SSD1363_256X128_F_4W_HW_SPI(U8G2_R0, CS, DC, RESET);
+#else
     U8G2_SSD1309_128X64_NONAME0_F_4W_HW_SPI _disp = U8G2_SSD1309_128X64_NONAME0_F_4W_HW_SPI(U8G2_R0, CS, DC, RESET);
+#endif
 };
 
 #endif /* F43C662F_B396_4A91_97E2_06EB4811F9E6 */

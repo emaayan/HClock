@@ -183,10 +183,16 @@ void setupButtons()
     increase_button.attachClick(increaseDate);
     decrease_button.attachClick(decreaseDate);
 #endif
+#if defined(DISPLAY_SSD1363)
+    // Big screen shows everything at once, so long-press is free for brightness.
+    increase_button.attachLongPressStart(brightnessUp);
+    decrease_button.attachLongPressStart(brightnessDown);
+#else
     increase_button.attachLongPressStart(leftScreen);
     increase_button.attachLongPressStop(resetScreen);
     decrease_button.attachLongPressStart(rightScreen);
     decrease_button.attachLongPressStop(resetScreen);
+#endif
 }
 
 void setup()
@@ -231,7 +237,6 @@ void setup()
 
 void loop()
 {
-   // Serial.println("Hello");
     if (ret)
     {
         onTickButtons();

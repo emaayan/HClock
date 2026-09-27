@@ -11,6 +11,7 @@ struct HebDates
     char isNewMonthIndicator[16 + 1];
     char festivalName[40];
     char omer_count_name[20];
+    char molad[40];     // Shabbos Mevorchim: new-month day(s), e.g. "מולד ראשון ושני"
 } typedef HebDates;
 
 #define TIME_SZ 6
@@ -46,6 +47,7 @@ void displayHebrewDates(const hdate *hebrewDate, struct HebDates *hr);
 void displayHebFestival(const hdate *hebrewDate, struct HebDates *hr);
 void displayScripture(const hdate *hDate, struct Scripture *scripture);
 void displayOmer(const hdate *hebrewDate, struct HebDates *hr);
+void displayMolad(const hdate *hebrewDate, struct HebDates *hr);
 void displayTimes(const hdate *hebrewDate, location here, struct HebTimes *hebTimes);
 
 #endif /* D71F0B9E_85BC_4D5F_80E1_CFDE9EBD7426 */

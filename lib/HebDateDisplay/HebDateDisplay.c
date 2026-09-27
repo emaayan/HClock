@@ -46,7 +46,9 @@ void displayNewMonth(const hdate *hebrewDate, struct HebDates *hr)
 {
     char isNewMonthIndicator[16 + 1] = "";
     const size_t sz_month = sizeof(isNewMonthIndicator);
-    if (isMacharRoshChodesh(hebrewDate))
+    // Suppress "מחר ר"ח" on Shabbos Mevorchim - the molad block already
+    // announces the Rosh Chodesh day(s) there, so the marker is redundant.
+    if (isMacharRoshChodesh(hebrewDate) && getshabbosmevorchim(*hebrewDate) != SHABBOS_MEVORCHIM)
     {
         strncpy(isNewMonthIndicator, ",מחר ר\"ח", sz_month);
     }
@@ -54,11 +56,8 @@ void displayNewMonth(const hdate *hebrewDate, struct HebDates *hr)
     {
         strncpy(isNewMonthIndicator, ",ר\"ח", sz_month);
     }
-    else if (getshabbosmevorchim(*hebrewDate) == SHABBOS_MEVORCHIM)
-    {
-        // molad molad = getmolad(hebrewDate.year, hebrewDate.month+1);
-        strncpy(isNewMonthIndicator, ",מולד", sz_month);
-    }
+    // Shabbos Mevorchim is announced by displayMolad() (the "מולד <day>" line),
+    // so no redundant marker is added on the Hebrew-date line here.
     else
     {
         strncpy(isNewMonthIndicator, "", sz_month);
@@ -66,6 +65,32 @@ void displayNewMonth(const hdate *hebrewDate, struct HebDates *hr)
 
     strncpy(hr->isNewMonthIndicator, isNewMonthIndicator, sizeof(hr->isNewMonthIndicator));
 }
+void displayMolad(const hdate *hebrewDate, struct HebDates *hr)
+{
+    // Only announced on Shabbos Mevorchim (the Shabbos before Rosh Chodesh).
+    if (getshabbosmevorchim(*hebrewDate) != SHABBOS_MEVORCHIM)
+    {
+        return;
+    }
+    // Announce which day(s) the new month falls on. Rosh Chodesh is 2 days when
+    // the outgoing month has 30 days (its 30th is day 1 and the new month's 1st
+    // is day 2), otherwise 1 day.
+    const int monthLen = LastDayOfHebrewMonth(hebrewDate->month, hebrewDate->year);
+    const int daysToFirst = monthLen - hebrewDate->day + 1; // from this Shabbos to the 1st
+    hdate rc1 = {0};
+    rc1.wday = (hebrewDate->wday + daysToFirst) % 7;
+    if (monthLen == 30)
+    {
+        hdate rc0 = {0};
+        rc0.wday = (rc1.wday + 6) % 7; // the day before (the 30th)
+        snprintf(hr->molad, sizeof(hr->molad), "מולד %s ו%s", numtowday(rc0, 1), numtowday(rc1, 1));
+    }
+    else
+    {
+        snprintf(hr->molad, sizeof(hr->molad), "מולד %s", numtowday(rc1, 1));
+    }
+}
+
 void displayHebrewDates(const hdate *hebrewDate, struct HebDates *hr)
 {
     displayDayName(hebrewDate, hr);
@@ -73,6 +98,7 @@ void displayHebrewDates(const hdate *hebrewDate, struct HebDates *hr)
     displayNewMonth(hebrewDate, hr);
     displayHebFestival(hebrewDate, hr);
     displayOmer(hebrewDate, hr);
+    displayMolad(hebrewDate, hr);
 }
 
 char *displayFestival_std(const yomtov yom_tov, char *buff, size_t szBuff)
