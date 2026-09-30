@@ -5,6 +5,16 @@
 #include <RTCLibWrapper.h>
 #include <U8g2lib.h>
 #include <SettingsLib.hpp>
+#if defined(DISPLAY_TFT)
+#include "U8g2Tft.h"
+#endif
+#if defined(DISPLAY_TFT_NATIVE)
+#include "native/NativeFace.h"
+#ifndef NIGHT_BACKLIGHT
+#define NIGHT_BACKLIGHT 40 // backlight level after צאת הכוכבים (day level = the contrast setting)
+#endif
+int _faceBacklight = -1; // level last set by the clock face; -1 = re-apply on the next draw
+#endif
 
 //#include <OledDisplayWrapper.h>
 extern "C"
@@ -22,7 +32,18 @@ extern "C"
 // Both are 4-wire HW SPI on the same CS/DC/RESET pins, so only the
 // constructor and the logical screen dimensions change.
 // NOTE: SSD1363 requires U8g2 >= 2.36.x.
-#if defined(DISPLAY_SSD1363)
+//   -D DISPLAY_TFT      -> 3.5"  480x320 SPI TFT: draws the 256x128 layout
+//                          scaled up (see U8g2Tft.h); contrast = backlight.
+#if defined(DISPLAY_SSD1363) || defined(DISPLAY_TFT)
+#define LAYOUT_256X128 // the 2.7" OLED and the TFT share the big-screen layout
+#endif
+#if defined(DISPLAY_TFT)
+#define SCREEN_WIDTH 256
+#define SCREEN_HEIGHT 128
+#define DISPLAY_CONTRAST 200 // backlight PWM 0..255
+#define CONTRAST_MIN 20
+U8G2_TFT _disp(U8G2_R0);
+#elif defined(DISPLAY_SSD1363)
 #define SCREEN_WIDTH 256
 #define SCREEN_HEIGHT 128
 #define DISPLAY_CONTRAST 255 // SSD1363 is 4-bit grayscale; low contrast reads as blank
@@ -155,7 +176,7 @@ void settz(const char *value)
     // tzset();
 }
 
-#if defined(DISPLAY_SSD1363)
+#if defined(LAYOUT_256X128)
 // Larger fonts for the 256x128 panel. Note: U8g2's biggest stock Hebrew font is
 // unifont (~16px); there is no 2x Hebrew, so Hebrew tops out here.
 static const uint8_t *_num_font = u8g2_font_9x15_tr;
@@ -266,7 +287,19 @@ void setNow(TMWrapper tmw)
 {
     _rtc.changeTime(tmw);
 }
-#if defined(DISPLAY_SSD1363)
+// "ט\"ז בתשרי" plus the ראש חודש note. The library gives the note with a leading
+// comma (",מחר ר\"ח"); drawn right to left that comma lands next to the note, so it
+// is rebuilt here as "<date>, <note>".
+void formatDayMonth(char *buf, size_t sz, const HebDates &hr)
+{
+    const char *note = hr.isNewMonthIndicator[0] == ',' ? hr.isNewMonthIndicator + 1 : hr.isNewMonthIndicator;
+    if (note[0])
+        snprintf(buf, sz, "%s ב%s, %s", hr.dayInMonth, hr.monthName, note);
+    else
+        snprintf(buf, sz, "%s ב%s", hr.dayInMonth, hr.monthName);
+}
+
+#if defined(LAYOUT_256X128)
 // 256x128 layout: header (2 rows) + all 8 zmanim in two columns + a context
 // line, so morning and evening times show together (no long-press needed).
 void combinedScreen(const TMWrapper tmw, float temp, const HebDates hr, HebTimes ht, Scripture scr)
@@ -280,7 +313,7 @@ void combinedScreen(const TMWrapper tmw, float temp, const HebDates hr, HebTimes
     writeUTF8(_heb_font, 13, hr.day_name, true); // weekday, top-right
 
     char dayMonth[52] = "";
-    snprintf(dayMonth, sizeof(dayMonth), "%s ב%s %s", hr.dayInMonth, hr.monthName, hr.isNewMonthIndicator);
+    formatDayMonth(dayMonth, sizeof(dayMonth), hr);
     writeUTF8(_heb_font, 31, dayMonth, true); // Hebrew date, row 2 (right)
 
     // ---- row 2 (left): molad on Shabbos Mevorchim -> "מולד <day>", left-justified ----
@@ -325,15 +358,15 @@ void combinedScreen(const TMWrapper tmw, float temp, const HebDates hr, HebTimes
         writeZman(rLeft, rRight, r1, ":נ\"ה", ht.candleLight);
     else if (strlen(ht.endFestival) > 0)
         writeZman(rLeft, rRight, r1, ":צומ", ht.endFestival);
-    writeZman(rLeft, rRight, r2, ":מ\"פ", ht.plug_hamincha);
-    writeZman(rLeft, rRight, r3, ":ץנ", ht.sunrise);
+    writeZman(rLeft, rRight, r2, ":ץנ", ht.sunrise);
+    writeZman(rLeft, rRight, r3, ":מ\"פ", ht.plug_hamincha);
     writeZman(rLeft, rRight, r4, ":כ\"צ", ht.tzais);
 }
 #endif
 
 void onPageLoop(const TMWrapper tmw,float temp, HebDates hr, HebTimes ht, Scripture scr)
 {
-#if defined(DISPLAY_SSD1363)
+#if defined(LAYOUT_256X128)
     // Big screen shows everything at once; long-press states are unused here.
     combinedScreen(tmw, temp, hr, ht, scr);
 #else
@@ -346,7 +379,7 @@ void onPageLoop(const TMWrapper tmw,float temp, HebDates hr, HebTimes ht, Script
     writeUTF8(_heb_font, 15, hr.day_name, true);
 
     char dayMonth[50 + 1] = "";
-    snprintf(dayMonth, sizeof(dayMonth), "%s ב%s %s", hr.dayInMonth, hr.monthName, hr.isNewMonthIndicator);
+    formatDayMonth(dayMonth, sizeof(dayMonth), hr);
 
     writeUTF8(_heb_font, 25, dayMonth, true);
 
@@ -388,6 +421,17 @@ void display()
         displayScripture(&hd, &scr);
         
         const float temp=_rtc.getTemperature();
+#if defined(DISPLAY_TFT_NATIVE)
+        // native TFT face: same data, drawn directly with TFT_eSPI
+        const bool night = nativeFaceDraw(tmw, temp, hd, hr, ht, scr);
+        // at night the backlight drops, except while the control bar is up
+        const int level = night && !nativeFaceBarVisible() ? min((int)NIGHT_BACKLIGHT, (int)_contrast) : _contrast;
+        if (level != _faceBacklight)
+        {
+            _disp.setContrast(level);
+            _faceBacklight = level;
+        }
+#else
         _disp.setDrawColor(COLOR_INDEX);         
         _disp.firstPage();
         do
@@ -395,6 +439,7 @@ void display()
             onPageLoop(tmw,temp, hr, ht, scr);
         }
         while (_disp.nextPage());
+#endif
     }
 }
 

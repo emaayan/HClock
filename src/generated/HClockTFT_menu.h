@@ -13,26 +13,19 @@
 
 #include <Arduino.h>
 #include <tcMenu.h>
-#include "tcMenuU8g2.h"
+#include "tcMenuTfteSpi.h"
+#include <graphics/MenuTouchScreenEncoder.h>
 #include <RuntimeMenuItem.h>
 #include <IoAbstraction.h>
 #include <EepromItemStorage.h>
 
 // variables we declare that you may need to access
 extern const PROGMEM ConnectorLocalInfo applicationInfo;
-// NOTE (manual edit): _disp type is selected by build flag so both the 2.42"
-// (SSD1309), 2.7" (SSD1363) and 3.5" TFT screens are supported - keep in sync with HClock.h.
-// If you regenerate this file from the tcMenu Designer, re-apply this conditional.
-#if defined(DISPLAY_TFT)
-#include "../U8g2Tft.h"
-extern U8G2_TFT _disp;
-#elif defined(DISPLAY_SSD1363)
-extern U8G2_SSD1363_256X128_F_4W_HW_SPI _disp;
-#else
-extern U8G2_SSD1309_128X64_NONAME0_F_4W_HW_SPI _disp;
-#endif
-extern U8g2Drawable _dispDrawable;
+extern TFT_eSPI tft;
+extern TfteSpiDrawable tftDrawable;
 extern GraphicsDeviceRenderer renderer;
+extern iotouch::TftSpiTouchInterrogator touchInterrogator;
+extern MenuTouchScreenManager touchScreen;
 
 // Any externals needed by IO expanders, EEPROMs etc
 

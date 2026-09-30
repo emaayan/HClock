@@ -1,7 +1,7 @@
 {
   "version": "1.00",
   "projectName": "Jewish clock",
-  "author": "elhanan",
+  "author": "root",
   "items": [
     {
       "parentId": 0,
@@ -48,6 +48,7 @@
         "variableName": "Location",
         "id": 4,
         "eepromAddress": -1,
+        "functionName": "",
         "readOnly": false,
         "localOnly": false,
         "visible": true,
@@ -106,18 +107,18 @@
   ],
   "codeOptions": {
     "embeddedPlatform": "ARDUINO_ESP32",
-    "lastDisplayUuid": "8646497b-1427-415f-8020-1260a1fef57d",
+    "lastDisplayUuid": "e6342680-6fab-4d1b-ac08-ce8dbfc0974c",
     "lastInputUuid": "2a3ae3ba-05f4-4c9c-aad3-3ddc88df9049",
     "lastRemoteUuids": [
       "2c101fec-1f7d-4ff3-8d2b-992ad41e7fcb"
     ],
-    "lastThemeUuid": "815316bb-76c9-436a-8f83-be0bced963df",
-    "applicationUUID": "5cef02bc-7171-4d0b-bfaa-88db9290f006",
-    "applicationName": "JewishClock",
+    "lastThemeUuid": "1947F585-9D36-448C-8A80-B425686107BD",
+    "applicationUUID": "ac1f9734-b033-46a4-a522-f4e1f302842e",
+    "applicationName": "HClockTFT",
     "lastProperties": [
       {
         "name": "DISPLAY_VARIABLE",
-        "latestValue": "_disp",
+        "latestValue": "tft",
         "subsystem": "DISPLAY"
       },
       {
@@ -192,12 +193,12 @@
       },
       {
         "name": "ITEM_FONT",
-        "latestValue": "def:,1",
+        "latestValue": "num:,4",
         "subsystem": "THEME"
       },
       {
         "name": "TITLE_FONT",
-        "latestValue": "def:,1",
+        "latestValue": "num:,4",
         "subsystem": "THEME"
       },
       {
@@ -219,12 +220,99 @@
         "name": "USE_TC_UNICODE",
         "latestValue": "false",
         "subsystem": "THEME"
+      },
+      {
+        "name": "DISPLAY_ROTATION",
+        "latestValue": "3",
+        "subsystem": "DISPLAY"
+      },
+      {
+        "name": "DOUBLE_BUFFER_ROWS",
+        "latestValue": "0",
+        "subsystem": "DISPLAY"
+      },
+      {
+        "name": "TOUCH_SEPARATOR",
+        "latestValue": "",
+        "subsystem": "DISPLAY"
+      },
+      {
+        "name": "TFT_TOUCH_SCREEN_REQUIRED",
+        "latestValue": "true",
+        "subsystem": "DISPLAY"
+      },
+      {
+        "name": "TOUCH_CALIB_WIDTH",
+        "latestValue": "480",
+        "subsystem": "DISPLAY"
+      },
+      {
+        "name": "TOUCH_CALIB_HEIGHT",
+        "latestValue": "320",
+        "subsystem": "DISPLAY"
+      },
+      {
+        "name": "TOUCH_USE_RAW_TFT_FUNCTION",
+        "latestValue": "false",
+        "subsystem": "DISPLAY"
+      },
+      {
+        "name": "ORIENTATION_SEPARATOR",
+        "latestValue": "",
+        "subsystem": "DISPLAY"
+      },
+      {
+        "name": "TFT_TOUCH_SWAP_XY",
+        "latestValue": "false",
+        "subsystem": "DISPLAY"
+      },
+      {
+        "name": "TFT_TOUCH_X_INVERTED",
+        "latestValue": "false",
+        "subsystem": "DISPLAY"
+      },
+      {
+        "name": "TFT_TOUCH_Y_INVERTED",
+        "latestValue": "false",
+        "subsystem": "DISPLAY"
+      },
+      {
+        "name": "CALIB_SEPARATOR",
+        "latestValue": "",
+        "subsystem": "DISPLAY"
+      },
+      {
+        "name": "TFT_TOUCH_SCREEN_CALIBRATE",
+        "latestValue": "false",
+        "subsystem": "DISPLAY"
+      },
+      {
+        "name": "TFT_TOUCH_CALIBRATION_STORAGE_LOC",
+        "latestValue": "400",
+        "subsystem": "DISPLAY"
+      },
+      {
+        "name": "BORDER_FOR_ACTIONS",
+        "latestValue": "0",
+        "subsystem": "THEME"
+      },
+      {
+        "name": "USE_SLIDER_ANALOG",
+        "latestValue": "true",
+        "subsystem": "THEME"
+      },
+      {
+        "name": "NEED_EDITING_ICONS",
+        "latestValue": "true",
+        "subsystem": "THEME"
       }
     ],
     "namingRecursive": true,
-    "useCppMain": true,
+    "useCppMain": false,
     "saveLocation": "PROJECT_TO_SRC_WITH_GENERATED",
+    "useDynamicMenus": false,
     "usingSizedEEPROMStorage": true,
+    "eepromSaveMode": "WRITE_BY_POSITION_WITH_SIZE",
     "eepromDefinition": "",
     "authenticatorDefinition": "",
     "projectIoExpanders": [
@@ -232,9 +320,7 @@
     ],
     "menuInMenuCollection": {
       "menuDefinitions": []
-    },
-    "packageNamespace": "",
-    "appIsModular": false
+    }
   },
   "stringLists": []
 }

@@ -15,7 +15,7 @@ status processFile(const char *fileName, Callback fileHandler)
  //status processFile(const char *fileName, const std::function<status(File)> &fileHandler)
 {
     status ret;
-    File file = LittleFS.open(fileName);
+    fs::File file = LittleFS.open(fileName); // fs:: because TFT_eSPI sets FS_NO_GLOBALS
     if (!file)
     {
         ret.code = -1;

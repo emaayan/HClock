@@ -180,6 +180,7 @@ void displayScripture(const hdate *hDate, struct Scripture *scripture)
     {
         strncpy(par_name, parshahformat(par), parasha_sz);
     }
+    strncpy(scripture->parasha, par_name, parasha_sz); // was computed but never stored
 
     const int avos = getavos(*hDate);
     if ((avos))
